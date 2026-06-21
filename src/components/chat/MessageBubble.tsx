@@ -22,7 +22,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({ message, onShowRea
         {!isUser && message.extractedStateSnapshot && (
           <div className="flex justify-between items-center mb-1.5 pb-1.5 border-b border-gray-50 dark:border-gray-800">
             <div className="flex items-center">
-              <img src={logo} alt="Uga Mascot" className="w-5 h-5 rounded-lg object-cover border border-uga-sage/30" />
+              <img src={logo} alt="Uga Mascot" className="w-6 h-6 rounded-full object-cover border border-uga-sage/30" />
               <span className="text-[9px] font-black tracking-wide text-uga-forest dark:text-emerald-400 ml-1.5">Uga</span>
             </div>
             {onShowReasoning && (
