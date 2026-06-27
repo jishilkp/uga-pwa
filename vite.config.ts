@@ -12,7 +12,7 @@ export default defineConfig({
       manifest: {
         name: 'UGA Healing Intelligence',
         short_name: 'UGA',
-        description: 'Your premium AI companion for emotional well-being and ecosystem coordination.',
+        description: 'Your companion for emotional well-being and ecosystem coordination.',
         theme_color: '#1B4332',
         background_color: '#FDFBF7',
         display: 'standalone',

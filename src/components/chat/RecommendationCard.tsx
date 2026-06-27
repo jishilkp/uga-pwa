@@ -36,17 +36,17 @@ export const RecommendationCard: React.FC<RecommendationCardProps> = ({ recommen
         <div className="p-1.5 bg-uga-sageLight rounded-lg">
           {getIcon()}
         </div>
-        <span className="text-[10px] font-bold uppercase tracking-wider text-uga-forestLight opacity-75">
+        <span className="text-[11px] font-bold uppercase tracking-wider text-uga-forestLight opacity-75">
           {getTypeLabel()}
         </span>
       </div>
 
       {/* Title */}
-      <h4 className="text-sm font-bold text-gray-900 mb-1">{title}</h4>
-      <p className="text-xs text-gray-500 font-bold mb-3">{payload.name}</p>
+      <h4 className="text-[15px] font-bold text-gray-900 mb-1">{title}</h4>
+      <p className="text-[13px] text-gray-500 font-bold mb-3">{payload.name}</p>
 
       {/* Description */}
-      <p className="text-xs text-gray-600 leading-relaxed mb-4">
+      <p className="text-[13px] text-gray-600 leading-relaxed mb-4">
         {payload.description}
       </p>
 
@@ -54,7 +54,7 @@ export const RecommendationCard: React.FC<RecommendationCardProps> = ({ recommen
       <button
         onClick={() => setIsJoined(true)}
         disabled={isJoined}
-        className={`w-full py-2.5 px-4 rounded-xl text-xs font-semibold flex items-center justify-center space-x-2 transition-all duration-200 ${
+        className={`w-full py-2.5 px-4 rounded-xl text-sm font-semibold flex items-center justify-center space-x-2 transition-all duration-200 ${
           isJoined
             ? 'bg-uga-sageLight text-uga-forest border border-uga-sage'
             : 'bg-uga-forest text-white hover:bg-uga-forestLight active:scale-[0.98]'

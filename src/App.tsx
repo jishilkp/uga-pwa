@@ -21,7 +21,8 @@ import {
   Copyright
 } from 'lucide-react';
 import logo from './assets/logo.jpg';
-import nature_path from './assets/nature_path.png';
+import serene_healing_hero from './assets/serene_healing_hero.png';
+import wisdom_science_fusion from './assets/wisdom_science_fusion.png';
 import { ambientSynth } from './services/ambientSynth';
 
 const langNames: Record<string, string> = {
@@ -45,63 +46,74 @@ const journeyStages = [
   {
     number: 2,
     name: "Orientation",
-    question: "Where am I on my journey?",
-    reality: "People want reassurance, not instant diagnostics. They need life context.",
-    role: "Ask 'What chapter of life are you in?' instead of 'What condition do you have?'",
-    example: "A new mother says: 'I don't recognize myself anymore.'",
-    response: "Explores caregiving stress, loss of autonomy, identity transition, and emotional exhaustion before jumping to pathology.",
-    principle: "Others classify people. UGA contextualizes people.",
-    support: ["Family & Caregivers", "Ecosystem support briefs", "Identity transition mapping"]
+    question: "Where am I on this path?",
+    reality: "They start to identify triggers, naming their patterns of distress and patterns of coping.",
+    role: "Provide a framework for self-location on a universal human journey.",
+    example: "A caregiver realizing they are in burnout phase rather than just tired.",
+    response: "Let's map your daily stressors. Recognizing where you are on the burnout spectrum is the first step toward reclaiming energy.",
+    principle: "Others offer immediate treatment. UGA offers dynamic navigation mapping.",
+    support: ["UGA Stage Mapping", "Stress & Coping Inventories", "Reflection Guides"]
   },
   {
     number: 3,
     name: "Navigation",
-    question: "What should I do next?",
-    reality: "People don't need a five-year plan. They need the next immediate action step.",
-    role: "Provide clear navigation and direction through reflection, rituals, and communities.",
-    example: "Someone grieving a parent asks: 'How do I stop feeling this way?'",
-    response: "Grief is not something to eliminate. Perhaps the next step is not recovery, but making space for the loss.",
-    principle: "Others provide answers. UGA provides direction.",
-    support: ["Reflection practices", "Loss rituals", "Peer support networks"]
+    question: "How do I move forward?",
+    reality: "Ready to choose paths but overwhelmed by disjointed choices or medical bureaucracy.",
+    role: "Act as a clean, connective companion linking science, wisdom, and lived experience.",
+    example: "A college student choosing between therapeutic modalities, exercise, and peer support.",
+    response: "Based on your goals, here are three pathways: cognitive reframing (CBT), somatic grounding (yoga), and local peer groups.",
+    principle: "Others prescribe single answers. UGA orchestrates holistic pathways.",
+    support: ["Therapeutic Navigation", "Integrative Pathways", "Resource Directories"]
   },
   {
     number: 4,
     name: "Healing",
-    question: "How do I move through this?",
-    reality: "Healing is rarely one intervention. It requires combining multiple modalities.",
-    role: "Orchestrate diverse modalities (science, yogas, peer support, communities).",
-    example: "A user recovering from burnout requires a composite, multi-layered path.",
-    response: "Suggests Sleep restoration (Science), Breath practices (Raja Yoga), Identity reflection (Jnana Yoga), and a Burnout recovery circle (Community).",
-    principle: "Others provide interventions. UGA builds healing pathways.",
-    support: ["Sleep restoration (Science)", "Breathwork (Raja Yoga)", "Identity inquiry (Jnana Yoga)", "Burnout recovery circles"]
+    question: "How do I integrate this pain?",
+    reality: "Deep processing, emotional integration, somatic release, and spiritual search.",
+    role: "Utilize Healing Lenses (Jnana, Bhakti, Karma, Raja Yogas) to tailor the inner growth journey.",
+    example: "A parent navigating complex grief after the loss of a child.",
+    response: "We will hold space for this grief. Through Bhakti (emotional integration) and Raja (mindfulness), we can gently carry this weight.",
+    principle: "Others seek quick symptom suppression. UGA seeks deep integration and growth.",
+    support: ["Healing Lenses Modules", "Somatic Grounding", "Contemplative Practices"]
   },
   {
     number: 5,
     name: "Connection",
-    question: "Who can help me?",
-    reality: "No AI can replace human relationships. Apps shouldn't lock users inside.",
-    role: "Intentionally route users outward to communities, facilitators, and experts.",
-    example: "A user showing trauma indicators needs trusted human witnesses.",
-    response: "Provides direct warm handoffs to local peer support circles, counselors, and NGO partners with user consent.",
-    principle: "Others retain users. UGA connects users.",
-    support: ["Therapists & Counselors", "NGO referrals", "Peer support circles", "Local resources"]
+    question: "Who is with me?",
+    reality: "Re-engaging with family, friends, and small-group support systems.",
+    role: "Re-anchor the individual in their immediate relational ecosystems.",
+    example: "A veteran struggling to talk to their spouse about combat stress.",
+    response: "Communicating vulnerability is a practice. Let's draft a simple message to share how you're feeling without overwhelm.",
+    principle: "Others treat the individual in isolation. UGA anchors them in connection.",
+    support: ["Relational Guidance", "Communication Tools", "Family Bridge Sessions"]
   },
   {
     number: 6,
     name: "Belonging",
     question: "Who else understands this?",
-    reality: "Healing accelerates when people feel seen and share mutual experiences.",
-    role: "Nurture communities and peer support systems rather than treating in isolation.",
-    example: "Someone recovering from addiction seeks validation of shared struggles.",
-    response: "Suggests Men's Transition circles, Grief Recovery groups, or recovery stories shared by lived-experience mentors.",
-    principle: "Others treat individuals. UGA nurtures communities.",
-    support: ["Peer groups", "Community circles", "Recovery story archives", "Lived experience mentors"]
+    reality: "Accelerated healing through shared identity, mutual validation, and collective wisdom.",
+    role: "Nurture communities and peer support systems sharing lived experience.",
+    example: "A new mother seeking validation of postpartum anxiety from other mothers.",
+    response: "You are not alone in this. I can connect you to peer groups of new mothers who share these identical worries.",
+    principle: "Others offer group therapy. UGA fosters deep communal belonging.",
+    support: ["Peer Support Networks", "Lived Experience Circles", "Shared Story Archives"]
   },
   {
     number: 7,
+    name: "Meaning & Contribution",
+    question: "How do I use this to serve others?",
+    reality: "Transforming personal struggle into active wisdom and service for the community.",
+    role: "Guide the shift from being helped to helping; creating purpose from pain.",
+    example: "A person in recovery wanting to mentor others starting their journey.",
+    response: "Your lived experience is extremely valuable. Let's explore peer mentorship training and community contribution pathways.",
+    principle: "Others end care at symptom relief. UGA guides transition to active service.",
+    support: ["Mentorship Training", "Community Volunteering", "Purpose Activation"]
+  },
+  {
+    number: 8,
     name: "Flourishing",
     question: "What am I capable of becoming?",
-    reality: "The highest human aspiration is not recovery; it is flourishing and contribution.",
+    reality: "Self-actualization, creative expression, spiritual alignment, and vibrant health.",
     role: "Support growth phases, creative contribution, and leadership development.",
     example: "A healthy individual asks: 'How can I live a more meaningful life?'",
     response: "Designs a customized journey involving learning, purpose coaching, volunteering, and contemplative practice.",
@@ -110,15 +122,56 @@ const journeyStages = [
   }
 ];
 
+const FadeInSection: React.FC<{ children: React.ReactNode; className?: string }> = ({ children, className = '' }) => {
+  const [isVisible, setVisible] = useState(false);
+  const domRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(entries => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          setVisible(true);
+        }
+      });
+    }, { threshold: 0.15 });
+
+    if (domRef.current) {
+      observer.observe(domRef.current);
+    }
+
+    return () => {
+      if (domRef.current) {
+        observer.unobserve(domRef.current);
+      }
+    };
+  }, []);
+
+  return (
+    <div
+      ref={domRef}
+      className={`fade-in-section ${isVisible ? 'is-visible' : ''} ${className}`}
+    >
+      {children}
+    </div>
+  );
+};
+
 export const App: React.FC = () => {
   const [inputText, setInputText] = useState('');
   const [isLangDropdownOpen, setIsLangDropdownOpen] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [isMusicPlaying, setIsMusicPlaying] = useState(false); // Music starts off by default
   const [reasoningMessage, setReasoningMessage] = useState<Message | null>(null);
-  const [activeWebTab, setActiveWebTab] = useState<'overview' | 'journey' | 'moat'>('overview');
+  const [activeScrollSection, setActiveScrollSection] = useState<'overview' | 'problem' | 'architecture' | 'stages' | 'trust'>('overview');
   const [activeJourneyStage, setActiveJourneyStage] = useState<number>(0);
   const [isMobileDevice, setIsMobileDevice] = useState(false);
+
+  const webScrollContainerRef = useRef<HTMLDivElement>(null);
+  const overviewRef = useRef<HTMLDivElement>(null);
+  const problemRef = useRef<HTMLDivElement>(null);
+  const architectureRef = useRef<HTMLDivElement>(null);
+  const stagesRef = useRef<HTMLDivElement>(null);
+  const trustRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const checkMobile = () => {
@@ -138,6 +191,54 @@ export const App: React.FC = () => {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
+  useEffect(() => {
+    if (isMobileDevice) return;
+
+    const handleScroll = () => {
+      const scrollContainer = webScrollContainerRef.current;
+      if (!scrollContainer) return;
+
+      const scrollTop = scrollContainer.scrollTop;
+      const containerHeight = scrollContainer.clientHeight;
+      
+      const sections = [
+        { id: 'overview', ref: overviewRef },
+        { id: 'problem', ref: problemRef },
+        { id: 'architecture', ref: architectureRef },
+        { id: 'stages', ref: stagesRef },
+        { id: 'trust', ref: trustRef }
+      ];
+
+      let currentSection = 'overview';
+      for (const section of sections) {
+        if (section.ref.current) {
+          const offsetTop = section.ref.current.offsetTop;
+          if (scrollTop >= offsetTop - containerHeight / 3) {
+            currentSection = section.id;
+          }
+        }
+      }
+      setActiveScrollSection(currentSection as any);
+    };
+
+    const scrollContainer = webScrollContainerRef.current;
+    if (scrollContainer) {
+      scrollContainer.addEventListener('scroll', handleScroll, { passive: true });
+      handleScroll();
+    }
+    return () => {
+      if (scrollContainer) {
+        scrollContainer.removeEventListener('scroll', handleScroll);
+      }
+    };
+  }, [isMobileDevice]);
+
+  const scrollToSection = (ref: React.RefObject<HTMLDivElement | null>) => {
+    if (ref.current) {
+      ref.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  };
+
   const threads = useJourneyStore((state) => state.threads);
   const activeThreadId = useJourneyStore((state) => state.activeThreadId);
   const language = useJourneyStore((state) => state.language);
@@ -145,6 +246,8 @@ export const App: React.FC = () => {
   const recordingDuration = useJourneyStore((state) => state.recordingDuration);
   
   const sendMessage = useJourneyStore((state) => state.sendMessage);
+  const sendAudioMessage = useJourneyStore((state) => state.sendAudioMessage);
+  const sendMediaMessage = useJourneyStore((state) => state.sendMediaMessage);
   const setLanguage = useJourneyStore((state) => state.setLanguage);
   const setRecording = useJourneyStore((state) => state.setRecording);
   const tickRecordingDuration = useJourneyStore((state) => state.tickRecordingDuration);
@@ -157,6 +260,10 @@ export const App: React.FC = () => {
 
   const chatContainerRef = useRef<HTMLDivElement>(null);
   const intervalRef = useRef<number | null>(null);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const audioChunksRef = useRef<Blob[]>([]);
+  const recordingDurationRef = useRef<number>(0);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Scroll to top of dashboard when language or theme changes on the home screen
   useEffect(() => {
@@ -179,18 +286,28 @@ export const App: React.FC = () => {
     };
   }, [isLangDropdownOpen]);
 
-  // Auto-scroll to bottom of chat when messages change (in active chat)
+  // Auto-scroll to bottom of chat when messages change (in active chat) with layout compensation for images
   useEffect(() => {
     if (messages.length > 0 && chatContainerRef.current) {
-      chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+      const scrollToBottom = () => {
+        if (chatContainerRef.current) {
+          chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+        }
+      };
+      scrollToBottom();
+      const timer1 = setTimeout(scrollToBottom, 60);
+      const timer2 = setTimeout(scrollToBottom, 300);
+      return () => { clearTimeout(timer1); clearTimeout(timer2); };
     }
   }, [messages]);
 
-  // Voice recording simulation timer
+  // Voice recording duration timer
   useEffect(() => {
     if (isRecording) {
+      recordingDurationRef.current = 0;
       intervalRef.current = window.setInterval(() => {
         tickRecordingDuration();
+        recordingDurationRef.current += 1;
       }, 1000);
     } else {
       if (intervalRef.current) {
@@ -203,16 +320,7 @@ export const App: React.FC = () => {
     };
   }, [isRecording]);
 
-  // Sync dark mode class to document element and body
-  useEffect(() => {
-    if (isDarkMode) {
-      document.documentElement.classList.add('dark');
-      document.body.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-      document.body.classList.remove('dark');
-    }
-  }, [isDarkMode]);
+// Sync dark mode removed to keep website independent
 
   // Toggle ambient music synth
   useEffect(() => {
@@ -261,19 +369,98 @@ export const App: React.FC = () => {
     }
   };
 
-  // Microphone recording click handler
-  const handleMicClick = () => {
+  // Microphone recording click handler with real MediaRecorder audio capture and HTTPS checks
+  const handleMicClick = async () => {
     if (isRecording) {
+      if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
+        mediaRecorderRef.current.stop();
+      }
       setRecording(false);
-      sendMessage(language === 'ta' ? 'குரல் பதிவு அனுப்பப்பட்டது' : language === 'hi' ? 'ऑडियो वॉयस संदेश भेजा गया' : 'Audio voice message sent');
     } else {
-      setRecording(true);
+      try {
+        if (!window.isSecureContext && location.hostname !== 'localhost' && location.hostname !== '127.0.0.1') {
+          alert('Microphone permission requires HTTPS on mobile devices. Please open the app using an HTTPS link (e.g. via Vercel or localtunnel) to trigger the microphone permission dialog.');
+          return;
+        }
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+          alert('Microphone access is not supported by your mobile browser in this environment.');
+          return;
+        }
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        const mimeType = (typeof MediaRecorder !== 'undefined' && MediaRecorder.isTypeSupported('audio/webm')) 
+          ? 'audio/webm' 
+          : (typeof MediaRecorder !== 'undefined' && MediaRecorder.isTypeSupported('audio/mp4')) 
+          ? 'audio/mp4' 
+          : '';
+        const mediaRecorder = new MediaRecorder(stream, mimeType ? { mimeType } : undefined);
+        mediaRecorderRef.current = mediaRecorder;
+        audioChunksRef.current = [];
+
+        mediaRecorder.ondataavailable = (e) => {
+          if (e.data.size > 0) {
+            audioChunksRef.current.push(e.data);
+          }
+        };
+
+        mediaRecorder.onstop = () => {
+          const audioBlob = new Blob(audioChunksRef.current, { type: mediaRecorder.mimeType || 'audio/webm' });
+          stream.getTracks().forEach(track => track.stop());
+
+          const reader = new FileReader();
+          reader.readAsDataURL(audioBlob);
+          reader.onloadend = () => {
+            const base64Audio = reader.result as string;
+            const duration = recordingDurationRef.current || 3;
+            sendAudioMessage(base64Audio, duration);
+          };
+        };
+
+        mediaRecorder.start(200);
+        setRecording(true);
+      } catch (err) {
+        console.error('Microphone recording error:', err);
+        alert('Could not access microphone. Please check your mobile browser settings to ensure microphone permission is allowed for this website.');
+      }
     }
+  };
+
+  // Media attachment click and file selection handlers
+  const handleAttachmentClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onloadend = () => {
+      const url = reader.result as string;
+      let type: 'image' | 'video' | 'audio' | 'file' = 'file';
+      if (file.type.startsWith('image/')) type = 'image';
+      else if (file.type.startsWith('video/')) type = 'video';
+      else if (file.type.startsWith('audio/')) type = 'audio';
+
+      const sizeFormatted = file.size > 1024 * 1024 
+        ? `${(file.size / (1024 * 1024)).toFixed(1)} MB` 
+        : `${Math.round(file.size / 1024)} KB`;
+
+      sendMediaMessage({
+        name: file.name,
+        type,
+        url,
+        size: sizeFormatted
+      });
+    };
+    e.target.value = '';
   };
 
   // Localized general UI elements matching mockup visual context
   const uiText = {
     en: {
+      title: "UGA",
+      healingIntelligence: "Healing Intelligence",
       greeting: "Hi, I'm Uga",
       tagline: 'Your companion for emotional well-being.',
       desc: 'Talk, share or ask anything. I\'m here to listen, support and guide you.',
@@ -290,6 +477,8 @@ export const App: React.FC = () => {
       suggestion6: 'Something else on my mind'
     },
     ta: {
+      title: "உகா",
+      healingIntelligence: "ஹீலிங் இன்டெலிஜென்ஸ்",
       greeting: 'வணக்கம், நான் உகா',
       tagline: 'உணர்ச்சி நல்வாழ்வுக்கான உங்கள் துணை.',
       desc: 'பேசுங்கள், பகிர்ந்து கொள்ளுங்கள் அல்லது கேளுங்கள். நான் கேட்க, ஆதரிக்க மற்றும் வழிநடத்த இங்கே இருக்கிறேன்.',
@@ -306,6 +495,8 @@ export const App: React.FC = () => {
       suggestion6: 'என் மனதில் வேறு ஏதோ இருக்கிறது'
     },
     hi: {
+      title: "उगा",
+      healingIntelligence: "हीलिंग इंटेलिजेंस",
       greeting: 'नमस्ते, मैं उगा हूँ',
       tagline: 'भावनात्मक कल्याण के लिए आपका साथी।',
       desc: 'बात करें, साझा करें या कुछ भी पूछें। मैं यहाँ सुनने, सहयोग करने और आपका मार्गदर्शन करने के लिए हूँ।',
@@ -344,322 +535,336 @@ export const App: React.FC = () => {
 
   const languageChips = [
     { code: 'en', label: 'English' },
-    { code: 'hi', label: 'हिंदी' },
     { code: 'ta', label: 'தமிழ்' },
-    { code: 'te', label: 'తెలుగు' },
-    { code: 'bn', label: 'বাংলা' },
-    { code: 'ml', label: 'മലയാളം' },
-    { code: 'kn', label: 'ಕನ್ನಡ' },
-    { code: 'mr', label: 'मराठी' },
-    { code: 'gu', label: 'ગુજરાતી' },
-    { code: 'pa', label: 'ਪੰਜਾਬി' }
+    { code: 'hi', label: 'हिंदी' }
   ];
 
   return (
-    <div className={`w-screen h-screen flex flex-col lg:flex-row overflow-hidden transition-colors duration-300 ${
-      isDarkMode ? 'dark bg-gray-950 text-gray-100' : 'bg-[#FDFBF7] text-gray-850'
-    }`}>
-      
+    <div className="w-screen h-screen flex flex-col lg:flex-row overflow-hidden bg-[#FDFBF7] text-gray-855 transition-colors duration-300">
+      <input type="file" ref={fileInputRef} onChange={handleFileSelect} className="hidden" accept="image/*,video/*,audio/*,.pdf,.doc,.docx" />
       {/* Left Column: Brand Marketing Content (visible only on desktop) */}
       {!isMobileDevice && (
-        <div className="hidden lg:flex lg:flex-col lg:flex-1 h-screen overflow-hidden bg-[#FDFBF7] dark:bg-gray-900 transition-colors duration-300 relative px-8 py-6 xl:px-10 xl:py-8">
-        
-        {/* Brand Header & Tab Switcher */}
-        <div className="flex items-center justify-between mb-5 xl:mb-6 border-b border-gray-150 dark:border-gray-800 pb-3 flex-shrink-0">
-          <div className="flex items-center space-x-3 text-left">
-            <img src={logo} alt="UGA Healing Intelligence Logo" className="w-12 h-12 xl:w-14 xl:h-14 rounded-full object-cover border border-uga-sage/40 dark:border-gray-800 dark:brightness-110" />
-            <div>
-              <h1 className="text-sm xl:text-base font-black uppercase tracking-wider text-uga-forest dark:text-emerald-400 leading-tight">UGA</h1>
-              <p className="text-[8px] xl:text-[9.5px] font-bold tracking-widest text-gray-400 dark:text-gray-500 uppercase leading-none mt-0.5">Healing Intelligence</p>
+        <div ref={webScrollContainerRef} className="hidden lg:flex lg:flex-col lg:flex-1 h-screen overflow-y-auto bg-[#FDFBF7] dark:bg-gray-955 transition-colors duration-300 relative">
+          
+          {/* Sticky Header inside Left Column */}
+          <div className="sticky top-0 bg-[#FDFBF7]/90 dark:bg-gray-955/90 backdrop-blur-md z-50 px-8 py-3 xl:px-10 xl:py-4 flex items-center justify-between flex-shrink-0">
+            <div className="flex items-center space-x-3 text-left">
+              <img src={logo} alt="UGA Healing Intelligence Logo" className="w-10 h-10 xl:w-11 xl:h-11 rounded-full object-cover border border-[#1B4332]/20 dark:border-gray-800 dark:brightness-110" />
+              <div>
+                <h1 className="text-sm xl:text-base font-black uppercase tracking-wider text-[#1B4332] dark:text-emerald-400 leading-tight">UGA</h1>
+                <p className="text-[8px] xl:text-[9.5px] font-bold tracking-widest text-gray-400 dark:text-gray-555 uppercase leading-none mt-0.5">Healing Intelligence</p>
+              </div>
+            </div>
+            
+            {/* Header Navigation */}
+            <div className="flex space-x-1 bg-[#F2EFE6] dark:bg-gray-800/80 p-1 rounded-full text-[10px] xl:text-[11px] font-black uppercase tracking-wider">
+              {[
+                { id: 'overview', label: 'Overview', ref: overviewRef },
+                { id: 'problem', label: 'Problem', ref: problemRef },
+                { id: 'architecture', label: 'Architecture', ref: architectureRef },
+                { id: 'stages', label: 'Journey', ref: stagesRef },
+                { id: 'trust', label: 'Trust & Safety', ref: trustRef }
+              ].map((tab) => (
+                <button
+                  key={tab.id}
+                  onClick={() => scrollToSection(tab.ref)}
+                  className={`px-4 py-2 rounded-full transition-all duration-300 cursor-pointer ${
+                    activeScrollSection === tab.id
+                      ? 'bg-[#1B4332] dark:bg-emerald-800 text-white shadow-[0_4px_12px_rgba(27,67,50,0.15)] dark:shadow-none'
+                      : 'text-gray-555 dark:text-gray-400 hover:text-[#1B4332] dark:hover:text-emerald-400'
+                  }`}
+                >
+                  {tab.label}
+                </button>
+              ))}
             </div>
           </div>
-          
-          {/* Tab Selector */}
-          <div className="flex bg-[#F2EFE6] dark:bg-gray-800/80 p-0.5 rounded-full text-[10px] font-black">
-            {[
-              { id: 'overview', label: 'Overview' },
-              { id: 'journey', label: 'Journey Map' },
-              { id: 'moat', label: 'Architecture' }
-            ].map((tab) => (
-              <button
-                key={tab.id}
-                onClick={() => setActiveWebTab(tab.id as any)}
-                className={`px-4 py-2 rounded-xl transition-all duration-300 cursor-pointer uppercase tracking-wider ${
-                  activeWebTab === tab.id
-                    ? 'bg-[#1B4332] dark:bg-emerald-900/80 text-white shadow-[0_4px_12px_rgba(27,67,50,0.12)] dark:shadow-none'
-                    : 'text-gray-500 dark:text-gray-400 hover:text-[#1B4332] dark:hover:text-emerald-400'
-                }`}
-              >
-                {tab.label}
-              </button>
-            ))}
-          </div>
-        </div>
 
-        {/* Tab Content Wrapper */}
-        <div className="flex-1 min-h-0 flex flex-col justify-between">
-          
-          {activeWebTab === 'overview' && (
-            <div className="flex-1 flex flex-col justify-between py-1">
-              {/* Hero Bento Card (Spans full width, merges graphic + content side by side) */}
-              <div className="relative w-full bg-white/70 dark:bg-gray-900/40 backdrop-blur-md rounded-[32px] border border-white/50 dark:border-gray-850/40 shadow-[0_15px_35px_-10px_rgba(0,0,0,0.02)] overflow-hidden flex flex-row items-stretch min-h-[290px] xl:min-h-[320px]">
-                
-                {/* Text Content Block */}
-                <div className="flex-1 p-6 xl:p-8 flex flex-col justify-between text-left z-10 relative">
-                  <div>
-                    <span className="inline-block bg-[#E5ECE7] dark:bg-[#1E3B2F] text-[#1B4332] dark:text-[#A7D7C5] text-[9px] font-black px-2.5 py-0.5 rounded-full uppercase tracking-widest mb-3">
-                      Healing Intelligence
-                    </span>
-                    
-                    <h2 className="text-3xl xl:text-4xl font-serif font-extrabold text-[#1B4332] dark:text-[#A7D7C5] tracking-tight leading-[1.1] mb-3">
-                      Your Safe Space to Heal
-                    </h2>
+          {/* Web Scrollable Content */}
+          <div className="px-8 pt-4 pb-12 xl:px-10 xl:pt-6 xl:pb-16 space-y-12 text-left max-w-4xl">
+            
+            {/* Section 1: Overview */}
+            <div ref={overviewRef} id="overview" className="scroll-mt-24 space-y-8">
+              <FadeInSection className="space-y-6">
+                <h2 className="text-3xl xl:text-4xl font-extrabold text-[#1B4332] dark:text-emerald-400 leading-tight font-display">
+                  A Companion for the Soul,<br />Not a Chatbot.
+                </h2>
+                <p className="text-sm xl:text-base text-gray-600 dark:text-gray-300 leading-relaxed font-medium">
+                  UGA is not a simple question-and-answer interface. It functions as the connective tissue—a gentle, intelligent companion—linking sacred ancient wisdom, clinical science, and active human community to guide individuals on a personalized path of growth and recovery.
+                </p>
+              </FadeInSection>
 
-                    <p className="text-[11.5px] xl:text-[12.5px] text-gray-500 dark:text-gray-400 font-semibold leading-relaxed max-w-md">
-                      Uga is a compassionate AI companion that listens without judgment. Built on the intersection of timeless wisdom, psychology, and neuroscience to guide you through life's transitions.
-                    </p>
-
-                    {/* Features Bullet Grid */}
-                    <div className="grid grid-cols-2 gap-x-4 gap-y-2.5 mt-5 text-[9.5px] font-bold text-gray-700 dark:text-gray-200">
-                      <div className="flex items-center space-x-2">
-                        <Globe size={13} className="text-[#1B4332] dark:text-[#A7D7C5]" />
-                        <span>Speak naturally in your tongue</span>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <Mic size={13} className="text-[#1B4332] dark:text-[#A7D7C5]" />
-                        <span>Voice-guided or text chatting</span>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <Shield size={13} className="text-[#1B4332] dark:text-[#A7D7C5]" />
-                        <span>Private, encrypted &amp; secure</span>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <Heart size={13} className="text-[#E63946]" fill="currentColor" />
-                        <span>Always here for you, 24/7</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Trigger Action */}
-                  <div className="mt-4">
-                    <button
-                      onClick={() => handleSuggestionClick(language === 'ta' ? 'வணக்கம், உரையாடலைத் தொடங்குங்கள்' : language === 'hi' ? 'नमस्ते, बातचीत शुरू करें' : 'Hello, let\'s start a conversation')}
-                      className="flex items-center space-x-2 px-5 py-2.5 bg-[#1B4332] hover:bg-[#2A5E47] text-white text-[10px] font-black rounded-full shadow-md active:scale-95 transition-all cursor-pointer uppercase tracking-wider"
-                    >
-                      <span>Start a Conversation</span>
-                      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
-                    </button>
-                  </div>
-                </div>
-
-                {/* Right Visual block with nature path asset */}
-                <div className="w-[36%] xl:w-[40%] relative overflow-hidden flex-shrink-0">
-                  <img src={nature_path} alt="Tranquil Path" className="absolute inset-0 w-full h-full object-cover" />
-                  <div className="absolute inset-y-0 left-0 bg-gradient-to-r from-white dark:from-[#111A24]/90 via-white/40 dark:via-[#111A24]/40 to-transparent w-[30%]" />
-                </div>
-              </div>
-
-              {/* Lower Grid: Two Bento Columns */}
-              <div className="grid grid-cols-2 gap-4 my-3">
-                {/* Bento Card 1: Core Philosophy */}
-                <div className="p-5 xl:p-6 bg-white/60 dark:bg-gray-900/40 backdrop-blur-md rounded-[24px] border border-white/50 dark:border-gray-850/40 shadow-sm flex flex-col justify-between text-left min-h-[160px]">
-                  <div>
-                    <span className="text-[7.5px] font-black uppercase text-[#B18C5D] dark:text-[#D1A673] tracking-widest block mb-1">Philosophy</span>
-                    <h3 className="text-sm font-black text-gray-800 dark:text-gray-100">The Four Yogas</h3>
-                    <p className="text-[10px] text-gray-500 dark:text-gray-400 font-semibold leading-relaxed mt-1.5">
-                      Uga weaves Jnana (wisdom), Bhakti (devotion), Karma (action), and Raja (meditation) to provide custom pathways suited to your unique life chapter.
-                    </p>
-                  </div>
-                  <span className="text-[8.5px] font-black text-[#5C8A67] dark:text-[#88C499] uppercase tracking-wider">Ancient wisdom</span>
-                </div>
-
-                {/* Bento Card 2: Scientific Moat */}
-                <div className="p-5 xl:p-6 bg-white/60 dark:bg-gray-900/40 backdrop-blur-md rounded-[24px] border border-white/50 dark:border-gray-850/40 shadow-sm flex flex-col justify-between text-left min-h-[160px]">
-                  <div>
-                    <span className="text-[7.5px] font-black uppercase text-[#B18C5D] dark:text-[#D1A673] tracking-widest block mb-1">Science</span>
-                    <h3 className="text-sm font-black text-gray-800 dark:text-gray-100">Modern Neuroscience</h3>
-                    <p className="text-[10px] text-gray-500 dark:text-gray-400 font-semibold leading-relaxed mt-1.5">
-                      Grounded in humanistic psychology, mindfulness practices, and modern cognitive behavioral science to provide safe, grounded guidance.
-                    </p>
-                  </div>
-                  <span className="text-[8.5px] font-black text-[#5C8A67] dark:text-[#88C499] uppercase tracking-wider">Clinical Foundation</span>
-                </div>
-              </div>
-
-              {/* Soothing Quote Banner (Slick glassmorphism at the bottom) */}
-              <div className="p-4 bg-white/40 dark:bg-gray-900/30 rounded-2xl flex items-center justify-between border border-white/20 dark:border-gray-850/30 text-left">
-                <div className="flex items-start space-x-3 z-10 flex-1">
-                  <span className="text-3xl font-serif text-[#5C8A67] dark:text-[#6BB07E] leading-none select-none opacity-80 mt-0.5">&ldquo;</span>
-                  <p className="text-[11.5px] font-serif font-bold text-gray-700 dark:text-gray-300 italic leading-relaxed pt-0.5">
-                    You don't have to go through it alone. We walk with you.
+              <FadeInSection className="relative rounded-2xl overflow-hidden shadow-2xl border border-gray-100 dark:border-gray-855 aspect-[16/9] group">
+                <img 
+                  src={serene_healing_hero} 
+                  alt="UGA Healing Hero Path" 
+                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" 
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/65 via-black/20 to-transparent flex items-end p-6">
+                  <p className="text-white text-xs xl:text-sm font-semibold tracking-wide backdrop-blur-sm bg-black/20 px-3 py-2 rounded-xl border border-white/10">
+                    "Healing is not a destination, but a path carved through wisdom and connection."
                   </p>
                 </div>
-                <div className="flex-shrink-0 z-10 text-[#5C8A67]/25 dark:text-[#6BB07E]/25">
-                  <svg className="w-8 h-8" viewBox="0 0 64 64" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M12 52C24 48 38 32 44 14" />
-                    <path d="M44 14C34 18 28 26 26 32" />
-                    <path d="M38 24C30 26 24 34 22 40" />
-                  </svg>
-                </div>
+              </FadeInSection>
+
+              {/* Core Pillars */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-4">
+                {[
+                  { title: "Universal Wisdom", desc: "Rooted in the four paths of Yoga—Jnana, Bhakti, Karma, Raja—along with humanistic psychology and world traditions.", icon: "🌱" },
+                  { title: "Modern Science", desc: "Backed by neuroscience, clinical guidance, cognitive behavioral frameworks, and somatic regulation principles.", icon: "🔬" },
+                  { title: "Human Community", desc: "No digital isolation. UGA prioritizes warm referrals to peers, local circles, and human specialists.", icon: "👥" }
+                ].map((pillar, idx) => (
+                  <FadeInSection key={idx} className="glassmorphic-card p-6 rounded-2xl border border-gray-150/60 dark:border-gray-800 space-y-3">
+                    <span className="text-2xl">{pillar.icon}</span>
+                    <h3 className="text-sm font-bold uppercase tracking-wider text-[#1B4332] dark:text-emerald-400">{pillar.title}</h3>
+                    <p className="text-xs text-gray-555 dark:text-gray-400 font-semibold leading-relaxed">{pillar.desc}</p>
+                  </FadeInSection>
+                ))}
               </div>
             </div>
-          )}
 
-          {activeWebTab === 'journey' && (
-            <div className="flex-1 flex flex-col justify-between py-1 text-left">
-              {/* Interactive Journey Timelines Stepper */}
-              <div className="flex justify-between items-center bg-white/40 dark:bg-gray-900/40 backdrop-blur-md p-2 rounded-2xl border border-white/20 dark:border-gray-850/30 flex-shrink-0 mb-4 overflow-x-auto">
-                {journeyStages.map((stage, idx) => {
-                  const isActive = activeJourneyStage === idx;
+            {/* Section 2: The Problem */}
+            <div ref={problemRef} id="problem" className="scroll-mt-24 space-y-8 pt-4">
+              <FadeInSection className="space-y-4">
+                <h2 className="text-2xl xl:text-3xl font-extrabold text-[#1B4332] dark:text-emerald-400">
+                  The Crisis of Fragmented Care
+                </h2>
+                <p className="text-xs xl:text-sm text-gray-555 dark:text-gray-455 leading-relaxed font-semibold">
+                  Today's mental health support structure is broken into isolated systems. People get stuck in transactional loops that fail to address the core human struggle.
+                </p>
+              </FadeInSection>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {[
+                  { title: "Clinical Silos", desc: "Clinical systems focus on diagnosing pathologies and symptom management, often separating the pain from the individual's life narrative.", icon: "🏥" },
+                  { title: "Retentive Digital Apps", desc: "Commercial self-care applications use algorithms to maximize screen time, isolating users in loops rather than guiding them outward.", icon: "📱" },
+                  { title: "Social Disconnection", desc: "The erosion of civic support networks leaves individuals without access to shared lived experience and active community integration.", icon: "🤝" }
+                ].map((silo, idx) => (
+                  <FadeInSection key={idx} className="glassmorphic-card p-6 rounded-2xl border border-gray-150/60 dark:border-gray-800 space-y-3">
+                    <span className="text-xl">{silo.icon}</span>
+                    <h3 className="text-xs font-black uppercase text-gray-700 dark:text-gray-305 tracking-wider">{silo.title}</h3>
+                    <p className="text-[11px] text-gray-555 dark:text-gray-455 font-semibold leading-relaxed">{silo.desc}</p>
+                  </FadeInSection>
+                ))}
+              </div>
+
+              {/* The Bridge */}
+              <FadeInSection className="bg-[#1B4332]/5 dark:bg-emerald-955/10 border border-[#1B4332]/10 dark:border-emerald-900/20 rounded-2xl p-6 flex flex-col md:flex-row items-center gap-6">
+                <div className="text-3xl">🌉</div>
+                <div className="space-y-1">
+                  <h4 className="text-xs font-bold uppercase text-[#1B4332] dark:text-emerald-400 tracking-wider">UGA is the Integrative Bridge</h4>
+                  <p className="text-xs text-gray-600 dark:text-gray-300 font-semibold leading-relaxed">
+                    By harmonizing wisdom, science, and community, UGA provides continuous accompaniment. It assists users when they are waiting for professional treatment, and helps them integrate learnings afterward.
+                  </p>
+                </div>
+              </FadeInSection>
+            </div>
+
+            {/* Section 3: The 5-Layer Architecture */}
+            <div ref={architectureRef} id="architecture" className="scroll-mt-24 space-y-8 pt-4">
+              <FadeInSection className="space-y-4">
+                <h2 className="text-2xl xl:text-3xl font-extrabold text-[#1B4332] dark:text-emerald-400">
+                  The 5-Layer Healing Engine
+                </h2>
+                <p className="text-xs xl:text-sm text-gray-555 dark:text-gray-455 leading-relaxed font-semibold">
+                  A high-fidelity framework designed to listen, understand, retrieve, contextualize, and orchestrate support without clinical assumptions.
+                </p>
+              </FadeInSection>
+
+              {/* Illustration and layers grid */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
+                <div className="space-y-4">
+                  {[
+                    { num: "1", title: "Experience Extraction", desc: "Identifies core needs, current stressors, and emotional transitions through empathetic listening, bypassing superficial labels." },
+                    { num: "2", title: "Journey Recognition", desc: "Recognizes the user's current life stage (e.g. grief, transition, caregiving) to map an appropriate, respectful rhythm." },
+                    { num: "3", title: "Healing Lenses", desc: "Adapts guidance using the four major paths: Jnana (intellect), Bhakti (emotion), Karma (service), and Raja (mind-body)." },
+                    { num: "4", title: "Knowledge Retrieval", desc: "Queries secure databases for clinically-approved wisdom, peer story archives, and physical community directories." },
+                    { num: "5", title: "Pathway Generation", desc: "Co-creates a structured, holistic action plan combining somatic practices, community circles, and clinician referrals." }
+                  ].map((layer, idx) => (
+                    <FadeInSection key={idx} className="flex gap-4">
+                      <div className="w-8 h-8 rounded-full bg-[#1B4332] dark:bg-emerald-900 text-white flex items-center justify-center font-black text-xs flex-shrink-0">
+                        {layer.num}
+                      </div>
+                      <div className="space-y-1 text-left">
+                        <h4 className="text-xs font-bold text-gray-855 dark:text-gray-200 uppercase tracking-wider">{layer.title}</h4>
+                        <p className="text-[11px] text-gray-555 dark:text-gray-455 font-semibold leading-relaxed">{layer.desc}</p>
+                      </div>
+                    </FadeInSection>
+                  ))}
+                </div>
+
+                <FadeInSection className="relative rounded-2xl overflow-hidden shadow-xl border border-gray-150 dark:border-gray-855 aspect-square">
+                  <img 
+                    src={wisdom_science_fusion} 
+                    alt="UGA Wisdom Science Fusion Diagram" 
+                    className="w-full h-full object-cover" 
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#1B4332]/70 via-black/10 to-transparent flex items-end p-6">
+                    <p className="text-white text-[10px] xl:text-xs font-bold tracking-wide leading-relaxed">
+                      "Integrating sacred geometry (wisdom pathways) with data structures (neuroscientific frameworks)."
+                    </p>
+                  </div>
+                </FadeInSection>
+              </div>
+            </div>
+
+            {/* Section 4: The 8-Stage Journey Timeline */}
+            <div ref={stagesRef} id="stages" className="scroll-mt-24 space-y-8 pt-4">
+              <FadeInSection className="space-y-4">
+                <h2 className="text-2xl xl:text-3xl font-extrabold text-[#1B4332] dark:text-emerald-400">
+                  The Journey Map to Flourishing
+                </h2>
+                <p className="text-xs xl:text-sm text-gray-555 dark:text-gray-455 leading-relaxed font-semibold">
+                  Healing is a process of growth. UGA structures pathways along eight distinct, developmental milestones, shifting focus from "symptom management" to "creative contribution".
+                </p>
+              </FadeInSection>
+
+              {/* Vertical timeline */}
+              <div className="relative pl-12 space-y-8 mt-10">
+                <div className="timeline-line"></div>
+                
+                {journeyStages.map((stage, index) => {
+                  const isActive = activeJourneyStage === index;
                   return (
-                    <button
-                      key={stage.number}
-                      onClick={() => setActiveJourneyStage(idx)}
-                      className={`flex-1 min-w-[70px] py-2 px-1 rounded-xl text-center transition-all duration-300 cursor-pointer ${
-                        isActive
-                          ? 'bg-[#1B4332] dark:bg-emerald-900/90 text-white font-black shadow-md scale-[1.02]'
-                          : 'text-gray-500 dark:text-gray-400 hover:text-[#1B4332] dark:hover:text-emerald-400 text-[9px] font-extrabold'
+                    <FadeInSection 
+                      key={stage.number} 
+                      className={`relative cursor-pointer transition-all duration-300 ${
+                        isActive ? 'scale-[1.01]' : 'opacity-70 hover:opacity-100'
                       }`}
                     >
-                      <div className="text-[9px] uppercase tracking-wider truncate">{stage.name}</div>
-                      <div className="text-[7.5px] opacity-75 mt-0.5">Stage {stage.number}</div>
-                    </button>
+                      {/* Interactive dot */}
+                      <div 
+                        onClick={() => setActiveJourneyStage(index)}
+                        className={`absolute -left-[42px] top-1.5 w-6 h-6 rounded-full border-2 border-[#1B4332] bg-[#FDFBF7] dark:bg-gray-900 flex items-center justify-center text-[10px] font-black z-10 timeline-dot ${
+                          isActive ? 'active' : ''
+                        }`}
+                      >
+                        {stage.number}
+                      </div>
+
+                      {/* Timeline Card */}
+                      <div 
+                        onClick={() => setActiveJourneyStage(index)}
+                        className={`glassmorphic-card p-6 rounded-2xl border text-left transition-all ${
+                          isActive 
+                            ? 'border-[#1B4332]/40 bg-[#1B4332]/5 dark:bg-emerald-955/10 shadow-[0_10px_30px_rgba(27,67,50,0.06)]' 
+                            : 'border-gray-150/60 dark:border-gray-800'
+                        }`}
+                      >
+                        <div className="flex justify-between items-start gap-4">
+                          <div>
+                            <span className="text-[9px] font-black uppercase text-[#1B4332] dark:text-emerald-455 tracking-widest block mb-0.5">Stage {stage.number}</span>
+                            <h3 className="text-sm font-bold text-gray-855 dark:text-gray-200">{stage.name}</h3>
+                          </div>
+                          <span className="text-xs italic text-gray-400 dark:text-gray-555 font-bold">"${stage.question}"</span>
+                        </div>
+
+                        {isActive && (
+                          <div className="mt-4 pt-4 border-t border-gray-155 dark:border-gray-855 space-y-4 text-xs animate-fadeIn">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                              <div className="space-y-1">
+                                <span className="text-[8px] font-black uppercase text-gray-400 tracking-wider block">Life Reality</span>
+                                <p className="text-[11px] text-gray-600 dark:text-gray-300 font-semibold leading-relaxed">{stage.reality}</p>
+                              </div>
+                              <div className="space-y-1">
+                                <span className="text-[8px] font-black uppercase text-gray-400 tracking-wider block">Companion Role</span>
+                                <p className="text-[11px] text-gray-600 dark:text-gray-300 font-semibold leading-relaxed">{stage.role}</p>
+                              </div>
+                            </div>
+
+                            <div className="p-3 bg-[#F2EFE6]/50 dark:bg-gray-800/40 rounded-xl space-y-1 border border-[#1B4332]/10">
+                              <span className="text-[8px] font-black uppercase text-gray-555 tracking-wider block">Empathetic Response Example</span>
+                              <p className="text-[11px] italic text-[#1B4332] dark:text-emerald-355 font-bold leading-relaxed">"${stage.response}"</p>
+                            </div>
+
+                            <div className="flex flex-wrap items-center gap-2 pt-1">
+                              <span className="text-[8px] font-black uppercase text-gray-405 tracking-wider">Ecosystem Actions:</span>
+                              {stage.support.map((sup, sIdx) => (
+                                <span key={sIdx} className="px-2.5 py-0.5 rounded-full text-[9px] font-bold bg-[#1B4332]/10 dark:bg-emerald-955 text-[#1B4332] dark:text-emerald-455 border border-[#1B4332]/10 dark:border-emerald-900/20">
+                                  {sup}
+                                </span>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </FadeInSection>
                   );
                 })}
               </div>
-
-              {/* Stage Details Bento Grid */}
-              <div className="flex-1 min-h-0 grid grid-cols-2 gap-4 bg-white/60 dark:bg-gray-900/45 backdrop-blur-md p-5 rounded-[28px] border border-white/50 dark:border-gray-850/40">
-                {/* Column 1: Human Reality & Scenario */}
-                <div className="space-y-4 border-r border-gray-100 dark:border-gray-800/80 pr-4 flex flex-col justify-between">
-                  <div>
-                    <span className="text-[7.5px] font-black uppercase text-[#B18C5D] dark:text-[#D1A673] tracking-widest block">Human Reality</span>
-                    <h4 className="text-xs font-black text-gray-850 dark:text-gray-100 mt-1 italic leading-tight">
-                      &ldquo;{journeyStages[activeJourneyStage].question}&rdquo;
-                    </h4>
-                    <p className="text-[10px] text-gray-600 dark:text-gray-300 font-semibold leading-relaxed mt-1.5">
-                      {journeyStages[activeJourneyStage].reality}
-                    </p>
-                  </div>
-
-                  <div>
-                    <span className="text-[7.5px] font-black uppercase text-[#B18C5D] dark:text-[#D1A673] tracking-widest block">Contextual Scenario</span>
-                    <p className="text-[10px] text-gray-500 dark:text-gray-400 font-semibold leading-relaxed mt-1">
-                      <span className="font-extrabold text-gray-700 dark:text-gray-300">Case Example: </span>
-                      {journeyStages[activeJourneyStage].example}
-                    </p>
-                  </div>
-
-                  <div className="bg-[#FAF8F2] dark:bg-[#1E1E1C]/60 p-3 rounded-xl border border-[#EBE6D6] dark:border-gray-800/50 mt-1">
-                    <span className="text-[8px] font-black uppercase text-[#1B4332] dark:text-emerald-400 tracking-widest block">UGA Adaptive Response</span>
-                    <p className="text-[10px] text-uga-forest dark:text-[#88C499] font-bold leading-relaxed mt-1 italic">
-                      &ldquo;{journeyStages[activeJourneyStage].response}&rdquo;
-                    </p>
-                  </div>
-                </div>
-
-                {/* Column 2: Platform Strategy & Moat */}
-                <div className="space-y-4 flex flex-col justify-between pl-2">
-                  <div>
-                    <span className="text-[7.5px] font-black uppercase text-[#B18C5D] dark:text-[#D1A673] tracking-widest block">UGA's Orchestration Role</span>
-                    <p className="text-[10px] text-gray-600 dark:text-gray-300 font-semibold leading-relaxed mt-1.5">
-                      {journeyStages[activeJourneyStage].role}
-                    </p>
-                  </div>
-
-                  <div>
-                    <span className="text-[7.5px] font-black uppercase text-[#B18C5D] dark:text-[#D1A673] tracking-widest block">Support Modalities &amp; Outlets</span>
-                    <div className="flex flex-wrap gap-1 mt-1.5">
-                      {journeyStages[activeJourneyStage].support.map((item, idx) => (
-                        <span key={idx} className="bg-emerald-50/70 dark:bg-emerald-950/20 text-[#1B4332] dark:text-[#88C499] text-[8.5px] font-black px-2 py-0.5 rounded-md border border-emerald-100/50 dark:border-emerald-900/30">
-                          {item}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div className="bg-emerald-50/40 dark:bg-emerald-950/15 p-3 rounded-xl border border-emerald-100/30 dark:border-emerald-900/20 mt-auto">
-                    <span className="text-[8px] font-black uppercase text-[#5C8A67] dark:text-[#6BB07E] tracking-widest block">Product Differentiation</span>
-                    <p className="text-[10px] text-emerald-800 dark:text-emerald-300 font-extrabold leading-relaxed mt-1">
-                      {journeyStages[activeJourneyStage].principle}
-                    </p>
-                  </div>
-                </div>
-              </div>
             </div>
-          )}
 
-          {activeWebTab === 'moat' && (
-            <div className="flex-1 flex flex-col justify-between py-1 text-left">
-              {/* Architecture & Comparison Details */}
-              <div className="flex-1 min-h-0 bg-white/60 dark:bg-gray-900/45 backdrop-blur-md p-5 rounded-[28px] border border-white/50 dark:border-gray-850/40 overflow-hidden flex flex-col justify-between">
-                <div>
-                  <h4 className="text-xs font-black text-gray-850 dark:text-gray-100 uppercase tracking-widest mb-3 text-center">
-                    The Healing Orchestration Layer vs Siloed Alternatives
-                  </h4>
-                  
-                  {/* Comparison Grid Table */}
-                  <div className="grid grid-cols-2 gap-2 text-[9.5px] font-black border-b border-gray-150 dark:border-gray-800 pb-2 mb-2">
-                    <div className="text-[#B18C5D] dark:text-[#D1A673] uppercase tracking-wider">Traditional Mental Health Apps</div>
-                    <div className="text-[#1B4332] dark:text-emerald-400 uppercase tracking-wider">UGA Healing Ecosystem</div>
-                  </div>
-                  
-                  <div className="space-y-2 max-h-[170px] overflow-y-auto pr-1 custom-scrollbar text-[9.5px] font-bold">
-                    {[
-                      { trad: "Focuses on symptoms", uga: "Focuses on journeys" },
-                      { trad: "Treats conditions in isolation", uga: "Understands the human experience" },
-                      { trad: "Delivers immediate interventions", uga: "Orchestrates personalized healing pathways" },
-                      { trad: "Operates in standalone silos", uga: "Connects wisdom, science, community & care" },
-                      { trad: "Optimizes recovery metrics", uga: "Optimizes human flourishing" },
-                      { trad: "Engages only at crisis points", uga: "Accompanies the entire journey" }
-                    ].map((item, idx) => (
-                      <div key={idx} className="grid grid-cols-2 gap-2 py-0.5 border-b border-gray-50 dark:border-gray-850/20 text-gray-500 dark:text-gray-400">
-                        <div>• {item.trad}</div>
-                        <div className="text-[#1B4332] dark:text-[#88C499] font-black">• {item.uga}</div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
+            {/* Section 5: Trust & Safety */}
+            <div ref={trustRef} id="trust" className="scroll-mt-24 space-y-8 pt-4 pb-12">
+              <FadeInSection className="space-y-4">
+                <h2 className="text-2xl xl:text-3xl font-extrabold text-[#1B4332] dark:text-emerald-400">
+                  Trust, Safety & Governance
+                </h2>
+                <p className="text-xs xl:text-sm text-gray-555 dark:text-gray-455 leading-relaxed font-semibold">
+                  Because human healing is sacred, UGA implements a checks-and-balances model that ensures strict limits on automated logic.
+                </p>
+              </FadeInSection>
 
-                {/* Platform Exclusions & Knowledge Foundation */}
-                <div className="grid grid-cols-2 gap-4 mt-4">
-                  {/* Exclusions */}
-                  <div className="p-3 bg-red-50/20 dark:bg-red-950/10 rounded-xl border border-red-100/30 dark:border-red-900/20 text-left">
-                    <span className="text-[7.5px] font-black uppercase text-red-600 dark:text-red-400 tracking-widest block mb-1">What UGA Will Never Do</span>
-                    <ul className="space-y-0.5 text-[8.5px] text-gray-500 dark:text-gray-400 font-bold">
-                      <li>• Diagnose clinical illnesses</li>
-                      <li>• Prescribe medication</li>
-                      <li>• Replace professional therapists</li>
-                      <li>• Claim certainty where uncertainty exists</li>
-                    </ul>
-                  </div>
-
-                  {/* Knowledge Moat */}
-                  <div className="p-3 bg-emerald-50/30 dark:bg-emerald-950/10 rounded-xl border border-emerald-100/30 dark:border-emerald-900/20 text-left">
-                    <span className="text-[7.5px] font-black uppercase text-[#1B4332] dark:text-emerald-400 tracking-widest block mb-1">Our Knowledge Base</span>
-                    <p className="text-[8.5px] text-gray-500 dark:text-gray-400 font-semibold leading-relaxed">
-                      Combines <span className="font-extrabold text-gray-700 dark:text-gray-300">Four Yogas</span> (Jnana, Bhakti, Karma, Raja) with Global Wisdom, Humanistic psychology, and modern clinical Neuroscience.
-                    </p>
-                  </div>
-                </div>
+              {/* Three Councils */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {[
+                  { title: "Clinical Advisory Board", desc: "Oversees diagnostic parameters, sets clinical safety guardrails, and signs off on crisis referral protocols.", icon: "🛡️" },
+                  { title: "Wisdom Council", desc: "Comprised of philosophers, spiritual practitioners, and experts in contemplative traditions to protect practice purity.", icon: "🕯️" },
+                  { title: "Lived Experience Council", desc: "Ensures the application design, language patterns, and pathways are centered on real, compassionate human stories.", icon: "🤝" }
+                ].map((council, idx) => (
+                  <FadeInSection key={idx} className="glassmorphic-card p-6 rounded-2xl border border-gray-150/60 dark:border-gray-800 space-y-3">
+                    <span className="text-xl">{council.icon}</span>
+                    <h3 className="text-xs font-bold uppercase text-gray-855 dark:text-gray-205 tracking-wider">{council.title}</h3>
+                    <p className="text-[11px] text-gray-555 dark:text-gray-400 font-semibold leading-relaxed">{council.desc}</p>
+                  </FadeInSection>
+                ))}
               </div>
+
+              {/* Crisis exclusions / emergency protocol */}
+              <FadeInSection className="bg-red-50/50 dark:bg-red-955/15 border border-red-100/55 dark:border-red-900/20 rounded-2xl p-6 space-y-4 text-left">
+                <div className="flex items-center gap-3">
+                  <span className="text-2xl">🚨</span>
+                  <div>
+                    <h4 className="text-xs font-bold uppercase text-red-655 dark:text-red-400 tracking-wider">Emergency Boundaries (Crisis Exclusions)</h4>
+                    <p className="text-[10px] text-gray-400 dark:text-gray-555 font-bold uppercase mt-0.5">Automated Exit Protocols</p>
+                  </div>
+                </div>
+                <p className="text-xs text-gray-600 dark:text-gray-305 font-semibold leading-relaxed">
+                  UGA maintains clear, deterministic boundaries. When a conversation exhibits acute clinical markers—such as active self-harm ideation, intent, or severe psychiatric crisis—UGA immediately initiates the following protocol:
+                </p>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs font-semibold">
+                  <div className="p-3 bg-white dark:bg-gray-900 rounded-xl border border-red-100/30 dark:border-red-950/20 flex gap-3">
+                    <span className="text-red-550">✕</span>
+                    <span>De-escalates automated conversational logic immediately.</span>
+                  </div>
+                  <div className="p-3 bg-white dark:bg-gray-900 rounded-xl border border-red-100/30 dark:border-red-950/20 flex gap-3">
+                    <span className="text-red-550">✓</span>
+                    <span>Provides direct, clickable, local crisis support helplines.</span>
+                  </div>
+                </div>
+              </FadeInSection>
+
+              {/* Copyright / Footer */}
+              <FadeInSection className="pt-8 border-t border-gray-150 dark:border-gray-855 flex items-center justify-between text-[10px] text-gray-400 dark:text-gray-555 font-bold uppercase tracking-wider">
+                <div className="flex items-center space-x-1.5">
+                  <Copyright className="w-3.5 h-3.5" />
+                  <span>{new Date().getFullYear()} UGA Healing Intelligence</span>
+                </div>
+                <span>All paths lead to flourishing</span>
+              </FadeInSection>
             </div>
-          )}
 
+          </div>
         </div>
-
-        </div>
-      )}
-
-      {/* Right Column: Interactive PWA App Container with realistic Phone Bezel Mockup */}
-      <div className={`flex-shrink-0 flex flex-col relative z-40 bg-transparent ${
+      )}{/* Right Column: Interactive PWA App Container with realistic Phone Bezel Mockup */}
+      <div className={`flex-shrink-0 flex flex-col relative z-40 bg-transparent lg:sticky lg:top-0 lg:h-screen ${
         isMobileDevice 
           ? 'w-full h-full p-0' 
           : 'w-full h-full lg:w-[413px] xl:w-[413px] items-center justify-center p-0 lg:p-6'
       }`}>
         
         {/* Phone Mockup Frame wrapper on desktop, transparent behaves normally on mobile */}
-        <div className={`relative flex flex-col ${
+        <div className={`relative flex flex-col ${isDarkMode ? 'dark' : ''} ${
           isMobileDevice 
             ? 'w-full h-full p-0 border-none rounded-none shadow-none bg-[#FDFBF7] dark:bg-gray-900'
             : 'w-[365px] h-[865px] max-h-[92vh] rounded-[48px] border-[12px] border-gray-900 dark:border-gray-800 shadow-[0_25px_60px_-15px_rgba(0,0,0,0.3)] bg-[#FDFBF7] dark:bg-gray-900 overflow-hidden'
@@ -698,8 +903,8 @@ export const App: React.FC = () => {
           >
             <img src={logo} alt="UGA Healing Intelligence" className="w-10 h-10 rounded-full object-cover border border-uga-sage/40 dark:border-gray-800 dark:brightness-110" />
             <div className="text-left">
-              <h1 className="text-[11px] font-black uppercase tracking-wider text-uga-forest dark:text-emerald-400 leading-tight">UGA</h1>
-              <p className="text-[7.5px] font-bold tracking-widest text-gray-400 dark:text-gray-500 uppercase leading-none mt-0.5">Healing Intelligence</p>
+              <h1 className="text-[13.5px] font-black uppercase tracking-wider text-uga-forest dark:text-emerald-400 leading-tight">{localizedUi.title}</h1>
+              <p className="text-[9px] font-bold tracking-widest text-gray-400 dark:text-gray-500 uppercase leading-none mt-0.5">{localizedUi.healingIntelligence}</p>
             </div>
           </div>
 
@@ -782,8 +987,8 @@ export const App: React.FC = () => {
                 <div className="flex items-center space-x-2">
                   <img src={logo} alt="UGA Healing Intelligence" className="w-10 h-10 rounded-full object-cover border border-uga-sage/40 dark:border-gray-800 dark:brightness-110" />
                   <div className="text-left">
-                    <h1 className="text-[11px] font-black uppercase tracking-wider text-uga-forest dark:text-emerald-400 leading-tight">UGA</h1>
-                    <p className="text-[7.5px] font-bold tracking-widest text-gray-400 dark:text-gray-500 uppercase leading-none mt-0.5">Healing Intelligence</p>
+                    <h1 className="text-[13.5px] font-black uppercase tracking-wider text-uga-forest dark:text-emerald-400 leading-tight">{localizedUi.title}</h1>
+                    <p className="text-[9px] font-bold tracking-widest text-gray-400 dark:text-gray-555 uppercase leading-none mt-0.5">{localizedUi.healingIntelligence}</p>
                   </div>
                 </div>
                 
@@ -852,11 +1057,11 @@ export const App: React.FC = () => {
               <img src={logo} alt="UGA Healing Intelligence" className="w-16 h-16 rounded-full object-cover border border-uga-sage/40 dark:border-gray-800 mb-4 dark:brightness-110" />
               
               {/* Splash Title & Intro */}
-              <h2 className="text-2xl font-black text-gray-900 dark:text-white tracking-tight">{localizedUi.greeting} 🌿</h2>
-              <p className="text-xs text-gray-500 dark:text-gray-400 font-bold mt-1 max-w-[250px]">
+              <h2 className="text-[27px] font-black text-gray-900 dark:text-white tracking-tight">{localizedUi.greeting} 🌿</h2>
+              <p className="text-[13.5px] text-gray-500 dark:text-gray-400 font-bold mt-1 max-w-[270px]">
                 {localizedUi.tagline}
               </p>
-              <p className="text-[11px] text-gray-400 dark:text-gray-500 mt-2 max-w-[280px] leading-relaxed font-medium">
+              <p className="text-[12.5px] text-gray-400 dark:text-gray-500 mt-2 max-w-[300px] leading-relaxed font-medium">
                 {localizedUi.desc}
               </p>
 
@@ -889,7 +1094,7 @@ export const App: React.FC = () => {
                     onKeyDown={handleKeyDown}
                     rows={2}
                     placeholder={localizedUi.inputPlaceholder}
-                    className="w-full bg-transparent text-sm font-medium focus:outline-none placeholder-gray-400 text-gray-800 dark:text-gray-100 resize-none"
+                    className="w-full bg-transparent text-[15px] font-medium focus:outline-none placeholder-gray-400 text-gray-800 dark:text-gray-100 resize-none"
                   />
                 )}
 
@@ -897,7 +1102,7 @@ export const App: React.FC = () => {
                 <div className="flex items-center justify-between mt-2.5 pt-2.5 border-t border-gray-50 dark:border-gray-800">
                   <div className="flex items-center space-x-3.5 text-gray-400">
                     <button 
-                      onClick={() => alert('Media upload simulation initiated.')}
+                      onClick={handleAttachmentClick}
                       className="p-1 hover:text-uga-forest transition"
                     >
                       <Paperclip size={18} />
@@ -930,24 +1135,18 @@ export const App: React.FC = () => {
               </div>
 
               {/* Language Selector Chips Card */}
-              <div className="w-full max-w-sm bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl p-3 shadow-sm text-center mb-4 relative">
-                <p className="text-[10px] font-extrabold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2.5">
+              <div className="w-full max-w-sm bg-[#FDFBF7] dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-xl py-2.5 px-3 shadow-sm text-center mb-3 relative flex flex-col items-center justify-center">
+                <p className="text-[10.5px] font-extrabold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">
                   {localizedUi.speakLang}
                 </p>
-                <div className="flex flex-wrap justify-center gap-1.5 mb-2">
+                <div className="flex justify-center gap-1.5 w-full mb-1.5">
                   {languageChips.map((chip) => {
                     const isActive = chip.code === language;
                     return (
                       <button
                         key={chip.code}
-                        onClick={() => {
-                          if (['en', 'ta', 'hi'].includes(chip.code)) {
-                            setLanguage(chip.code as any);
-                          } else {
-                            alert(`Language "${chip.label}" is supported in our production pipeline! Selected for demo simulation.`);
-                          }
-                        }}
-                        className={`px-2.5 py-1 rounded-full text-xs font-semibold border transition-all ${
+                        onClick={() => setLanguage(chip.code as any)}
+                        className={`flex-1 py-1 px-2 rounded-lg text-[13px] font-semibold border transition-all ${
                           isActive
                             ? 'bg-uga-sageLight dark:bg-uga-forestLight border-uga-forest dark:border-emerald-400 text-uga-forest dark:text-white font-bold shadow-sm'
                             : 'bg-white dark:bg-gray-800 border-gray-100 dark:border-gray-700 text-gray-600 dark:text-gray-300 hover:border-gray-200 dark:hover:border-gray-600'
@@ -957,19 +1156,15 @@ export const App: React.FC = () => {
                       </button>
                     );
                   })}
-                  <button 
-                    onClick={() => alert('12+ Indian languages supported including Kannada, Marathi, Gujarati, Punjabi, Bengali, Telugu, and Hindi.')}
-                    className="px-2.5 py-1 rounded-full text-xs font-semibold border bg-white dark:bg-gray-800 border-gray-100 dark:border-gray-700 text-uga-forest dark:text-emerald-400 font-bold"
-                  >
-                    +2 more
-                  </button>
                 </div>
-                <p className="text-[9px] text-gray-400 font-bold">12+ Indian languages supported</p>
+                <p className="text-[9.5px] text-gray-400 dark:text-gray-555 font-semibold tracking-wide">
+                  We're bringing support for 12+ Indian Languages
+                </p>
               </div>
 
               {/* Conversation Prompts Grid */}
               <div className="w-full max-w-sm text-left mb-4">
-                <span className="text-[10px] font-extrabold uppercase tracking-wider text-uga-forestLight dark:text-emerald-400 opacity-85 px-1 block mb-2.5">
+                <span className="text-[11.5px] font-extrabold uppercase tracking-wider text-uga-forestLight dark:text-emerald-400 opacity-85 px-1 block mb-2.5">
                   {localizedUi.suggestionTitle}
                 </span>
 
@@ -983,7 +1178,7 @@ export const App: React.FC = () => {
                     <button
                       key={index}
                       onClick={() => handleSuggestionClick(item.text)}
-                      className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-xl p-2.5 text-left text-xs font-bold text-gray-700 dark:text-gray-200 shadow-sm flex flex-col items-start gap-1.5 h-auto transition active:scale-[0.99] hover:border-uga-sageDark dark:hover:border-gray-700"
+                      className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-xl p-2.5 text-left text-[13px] font-bold text-gray-700 dark:text-gray-200 shadow-sm flex flex-col items-start gap-1.5 h-auto transition active:scale-[0.99] hover:border-uga-sageDark dark:hover:border-gray-700"
                     >
                       <div className="p-1 bg-uga-sageLight dark:bg-gray-800 rounded-lg self-start">
                         {item.icon}
@@ -997,7 +1192,7 @@ export const App: React.FC = () => {
               {/* Previous Conversations Section (Card below prompts grid) */}
               {threads.length > 0 && (
                 <div className="w-full max-w-sm bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl p-3 shadow-sm text-left mb-4 relative">
-                  <p className="text-[10px] font-extrabold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2.5">
+                  <p className="text-[11.5px] font-extrabold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2.5">
                     {language === 'ta' ? 'முந்தைய உரையாடல்கள்' : language === 'hi' ? 'पिछली बातचीत' : 'Previous Conversations'}
                   </p>
                   <div className="space-y-2 max-h-40 overflow-y-auto pr-1 custom-scrollbar">
@@ -1014,10 +1209,10 @@ export const App: React.FC = () => {
                             className="flex-1 min-w-0 cursor-pointer pr-3"
                           >
                             <div className="flex items-center justify-between mb-0.5">
-                              <h4 className="text-[11px] font-black text-gray-800 dark:text-gray-100 truncate">{thread.title}</h4>
+                              <h4 className="text-[12.5px] font-black text-gray-800 dark:text-gray-100 truncate">{thread.title}</h4>
                               <span className="text-[7.5px] font-bold text-gray-400 dark:text-gray-500 uppercase flex-shrink-0">{thread.lastUpdated}</span>
                             </div>
-                            <p className="text-[9.5px] font-semibold text-gray-500 dark:text-gray-400 truncate leading-snug">
+                            <p className="text-[10.5px] font-semibold text-gray-500 dark:text-gray-400 truncate leading-snug">
                               {snippet}
                             </p>
                           </div>
@@ -1046,13 +1241,13 @@ export const App: React.FC = () => {
                 <div className="p-1.5 bg-emerald-100/70 dark:bg-emerald-900/40 rounded-xl flex-shrink-0">
                   <Shield size={15} className="text-uga-forest dark:text-emerald-400" />
                 </div>
-                <span className="text-[10px] text-emerald-800/90 dark:text-emerald-300/85 leading-relaxed font-bold">
+                <span className="text-[11.5px] text-emerald-800/90 dark:text-emerald-300/85 leading-relaxed font-bold">
                   {localizedUi.safeSpace}
                 </span>
               </div>
 
               {/* Copyright Footer */}
-              <div className="flex items-center justify-center space-x-1 text-[9.5px] font-black tracking-wider text-gray-400 dark:text-gray-600 mt-2.5 mb-4 uppercase">
+              <div className="flex items-center justify-center space-x-1 text-[10.5px] font-black tracking-wider text-gray-400 dark:text-gray-600 mt-2.5 mb-4 uppercase">
                 <Copyright size={10} strokeWidth={2.5} />
                 <span>Uga 2026</span>
               </div>
@@ -1060,7 +1255,7 @@ export const App: React.FC = () => {
             </div>
           ) : (
             /* Conversational thread layout */
-            <div className="pb-24">
+            <div className="pb-3">
               {messages.map((msg) => (
                 <div key={msg.id}>
                   <MessageBubble message={msg} onShowReasoning={setReasoningMessage} />
@@ -1073,13 +1268,13 @@ export const App: React.FC = () => {
           )}
         </div>
 
-        {/* Floating Chat Input bar at the bottom when in conversation mode */}
+        {/* Clean Docked Chat Input bar at the bottom when in conversation mode */}
         {messages.length > 0 && (
-          <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-[#FDFBF7] dark:from-gray-900 via-[#FDFBF7]/95 dark:via-gray-900/95 to-transparent z-35">
+          <div className="flex-shrink-0 bg-[#FDFBF7] dark:bg-gray-900 px-4 pb-3.5 pt-1.5 z-40">
             <div className="glass-panel rounded-2xl p-3 flex items-center justify-between border border-uga-sageDark dark:border-gray-800 shadow-lg">
               
               <button 
-                onClick={() => alert('Media upload simulation initiated.')}
+                onClick={handleAttachmentClick}
                 className="p-1.5 text-gray-400 hover:text-uga-forest dark:hover:text-emerald-400 rounded-xl transition active:scale-95"
               >
                 <Paperclip size={18} />

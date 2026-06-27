@@ -3,11 +3,21 @@ import { persist } from 'zustand/middleware';
 import { getMockResponse } from '../services/mockOrchestrator';
 import type { JourneyMetadata, Recommendation } from '../services/mockOrchestrator';
 
+export interface Attachment {
+  name: string;
+  type: 'image' | 'video' | 'audio' | 'file';
+  url: string;
+  size?: string;
+}
+
 export interface Message {
   id: string;
   sender: 'user' | 'ai';
   text: string;
   timestamp: string;
+  audioUrl?: string;
+  audioDuration?: number;
+  attachment?: Attachment;
   extractedStateSnapshot?: {
     journey: string;
     stage: string;
@@ -75,6 +85,8 @@ interface JourneyStore {
   switchThread: (id: string | null) => void;
   deleteThread: (id: string) => void;
   sendMessage: (text: string) => void;
+  sendAudioMessage: (audioUrl: string, duration: number, text?: string) => void;
+  sendMediaMessage: (attachment: Attachment, text?: string) => void;
   setLanguage: (lang: 'en' | 'ta' | 'hi') => void;
   updateConsent: (stakeholder: Stakeholder, field: string, value: boolean) => void;
   setRecording: (recording: boolean) => void;
@@ -236,6 +248,124 @@ export const useJourneyStore = create<JourneyStore>()(
           return {
             ...t,
             messages: [...updatedMessages, aiMessage],
+            journeyMetadata: res.journeyMetadata,
+            recommendations: res.recommendations,
+            systemAction: res.systemAction,
+            activeLens: res.activeLens,
+            lastUpdated: 'Just now'
+          };
+        }
+        return t;
+      })
+    }));
+  },
+
+  sendAudioMessage: (audioUrl, duration, text) => {
+    let { activeThreadId, language, createNewThread, switchThread } = get();
+    let threadId = activeThreadId;
+    
+    const defaultText = language === 'ta' ? '🎙️ குரல் பதிவு' : language === 'hi' ? '🎙️ ऑडियो संदेश' : '🎙️ Voice Note';
+    const messageText = text || defaultText;
+
+    if (!threadId) {
+      threadId = createNewThread(messageText);
+      switchThread(threadId);
+    }
+
+    const targetThread = get().threads.find(t => t.id === threadId);
+    const userTurnCount = targetThread ? targetThread.messages.filter(m => m.sender === 'user').length : 0;
+
+    const userMessage: Message = {
+      id: 'msg-user-' + Math.random().toString(36).substring(7),
+      sender: 'user',
+      text: messageText,
+      audioUrl,
+      audioDuration: duration,
+      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+    };
+
+    const res = getMockResponse("Audio voice note sharing emotional state", userTurnCount, language);
+
+    const aiMessage: Message = {
+      id: 'msg-ai-' + Math.random().toString(36).substring(7),
+      sender: 'ai',
+      text: res.textResponse,
+      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      extractedStateSnapshot: {
+        journey: res.journeyMetadata.currentJourney,
+        stage: res.journeyMetadata.currentStage,
+        themes: res.journeyMetadata.extractedThemes,
+        needs: res.journeyMetadata.unmetNeeds,
+        risks: res.journeyMetadata.riskIndicators
+      },
+      recommendations: res.recommendations
+    };
+
+    set((state) => ({
+      threads: state.threads.map(t => {
+        if (t.id === threadId) {
+          const currentMsgs = t.messages.some(m => m.id === userMessage.id) ? t.messages : [...t.messages, userMessage];
+          return {
+            ...t,
+            messages: [...currentMsgs, aiMessage],
+            journeyMetadata: res.journeyMetadata,
+            recommendations: res.recommendations,
+            systemAction: res.systemAction,
+            activeLens: res.activeLens,
+            lastUpdated: 'Just now'
+          };
+        }
+        return t;
+      })
+    }));
+  },
+
+  sendMediaMessage: (attachment, text) => {
+    let { activeThreadId, language, createNewThread, switchThread } = get();
+    let threadId = activeThreadId;
+
+    const defaultText = text || (attachment.type === 'image' ? '🖼️ Attached Image' : attachment.type === 'video' ? '📹 Attached Video' : '📎 Attached File: ' + attachment.name);
+
+    if (!threadId) {
+      threadId = createNewThread(defaultText);
+      switchThread(threadId);
+    }
+
+    const targetThread = get().threads.find(t => t.id === threadId);
+    const userTurnCount = targetThread ? targetThread.messages.filter(m => m.sender === 'user').length : 0;
+
+    const userMessage: Message = {
+      id: 'msg-user-' + Math.random().toString(36).substring(7),
+      sender: 'user',
+      text: defaultText,
+      attachment,
+      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+    };
+
+    const res = getMockResponse("Shared media attachment for reflection", userTurnCount, language);
+
+    const aiMessage: Message = {
+      id: 'msg-ai-' + Math.random().toString(36).substring(7),
+      sender: 'ai',
+      text: res.textResponse,
+      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      extractedStateSnapshot: {
+        journey: res.journeyMetadata.currentJourney,
+        stage: res.journeyMetadata.currentStage,
+        themes: res.journeyMetadata.extractedThemes,
+        needs: res.journeyMetadata.unmetNeeds,
+        risks: res.journeyMetadata.riskIndicators
+      },
+      recommendations: res.recommendations
+    };
+
+    set((state) => ({
+      threads: state.threads.map(t => {
+        if (t.id === threadId) {
+          const currentMsgs = t.messages.some(m => m.id === userMessage.id) ? t.messages : [...t.messages, userMessage];
+          return {
+            ...t,
+            messages: [...currentMsgs, aiMessage],
             journeyMetadata: res.journeyMetadata,
             recommendations: res.recommendations,
             systemAction: res.systemAction,

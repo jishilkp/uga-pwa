@@ -182,3 +182,54 @@
     border-right-color: var(--border);
   }
 }
+
+/* Scroll-driven animations */
+.fade-in-section {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 0.9s cubic-bezier(0.16, 1, 0.3, 1), transform 0.9s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: opacity, transform;
+}
+
+.fade-in-section.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Timeline paths */
+.timeline-line {
+  position: absolute;
+  left: 20px;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: linear-gradient(to bottom, transparent, #1B4332 15%, #1B4332 85%, transparent);
+}
+
+.timeline-dot {
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.timeline-dot.active {
+  background-color: #1B4332 !important;
+  box-shadow: 0 0 0 6px rgba(27, 67, 50, 0.2);
+  transform: scale(1.2);
+}
+
+/* Glassmorphism custom styling */
+.glassmorphic-card {
+  background: rgba(255, 255, 255, 0.5);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.dark .glassmorphic-card {
+  background: rgba(17, 24, 39, 0.4);
+}
+
+.glassmorphic-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.04);
+}
+
