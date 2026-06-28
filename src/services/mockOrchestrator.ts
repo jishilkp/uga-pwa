@@ -58,8 +58,10 @@ const WISDOM_CORPUS = {
 export function getMockResponse(
   message: string,
   turnCount: number,
-  language: 'en' | 'ta' | 'hi'
+  language: 'en' | 'ta' | 'hi',
+  username?: string
 ): OrchestratorResult {
+  console.info(`[UGA API Payload] Sending request -> username: "${username || 'Guest'}", language: "${language}", turns: ${turnCount}`);
   const cleanMsg = message.toLowerCase().trim();
 
   // 1. SAFETY INTERCEPTOR GUARDRAIL

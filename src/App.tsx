@@ -172,7 +172,7 @@ export const App: React.FC = () => {
   const [isMobileDevice, setIsMobileDevice] = useState(false);
 
   // Auth state
-  const { user, isGuest, isAuthenticated, canStartGuestChat, incrementGuestChat, logout } = useAuthStore();
+  const { user, isGuest, isAuthenticated, logout } = useAuthStore();
   const [isProfileSheetOpen, setIsProfileSheetOpen] = useState(false);
   const [isGuestLimitModalOpen, setIsGuestLimitModalOpen] = useState(false);
 
@@ -364,14 +364,8 @@ export const App: React.FC = () => {
   const handleSend = () => {
     if (inputText.trim() === '') return;
     if (!activeThreadId) {
-      // Gate new thread creation for guest users
-      if (isGuest && !canStartGuestChat()) {
-        setIsGuestLimitModalOpen(true);
-        return;
-      }
       const newId = createNewThread(inputText, inputText);
       switchThread(newId);
-      if (isGuest) incrementGuestChat();
     } else {
       sendMessage(inputText);
     }
@@ -542,14 +536,8 @@ export const App: React.FC = () => {
   // Quick suggestion card click handler
   const handleSuggestionClick = (suggestionText: string) => {
     if (!activeThreadId) {
-      // Gate new thread creation for guest users
-      if (isGuest && !canStartGuestChat()) {
-        setIsGuestLimitModalOpen(true);
-        return;
-      }
       const newId = createNewThread(suggestionText, suggestionText);
       switchThread(newId);
-      if (isGuest) incrementGuestChat();
     } else {
       sendMessage(suggestionText);
     }

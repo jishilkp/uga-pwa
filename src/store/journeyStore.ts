@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { getMockResponse } from '../services/mockOrchestrator';
 import type { JourneyMetadata, Recommendation } from '../services/mockOrchestrator';
+import { useAuthStore } from './authStore';
 
 export interface Attachment {
   name: string;
@@ -143,7 +144,8 @@ export const useJourneyStore = create<JourneyStore>()(
       // Trigger response logic for this new thread
       const store = get();
       const userTurnCount = 0;
-      const res = getMockResponse(initialMessage, userTurnCount, store.language);
+      const username = useAuthStore.getState().user?.name;
+      const res = getMockResponse(initialMessage, userTurnCount, store.language, username);
       
       const aiMessage: Message = {
         id: 'msg-init-2',
@@ -225,7 +227,8 @@ export const useJourneyStore = create<JourneyStore>()(
     const updatedMessages = [...thread.messages, userMessage];
 
     // Evaluate response
-    const res = getMockResponse(text, userTurnCount, language);
+    const username = useAuthStore.getState().user?.name;
+    const res = getMockResponse(text, userTurnCount, language, username);
 
     const aiMessage: Message = {
       id: 'msg-ai-' + Math.random().toString(36).substring(7),
@@ -284,7 +287,8 @@ export const useJourneyStore = create<JourneyStore>()(
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
     };
 
-    const res = getMockResponse("Audio voice note sharing emotional state", userTurnCount, language);
+    const username = useAuthStore.getState().user?.name;
+    const res = getMockResponse("Audio voice note sharing emotional state", userTurnCount, language, username);
 
     const aiMessage: Message = {
       id: 'msg-ai-' + Math.random().toString(36).substring(7),
@@ -342,7 +346,8 @@ export const useJourneyStore = create<JourneyStore>()(
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
     };
 
-    const res = getMockResponse("Shared media attachment for reflection", userTurnCount, language);
+    const username = useAuthStore.getState().user?.name;
+    const res = getMockResponse("Shared media attachment for reflection", userTurnCount, language, username);
 
     const aiMessage: Message = {
       id: 'msg-ai-' + Math.random().toString(36).substring(7),

@@ -1,11 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { useAuthStore } from '../../store/authStore';
+import { useAuthStore, type AuthStep } from '../../store/authStore';
 import { useJourneyStore } from '../../store/journeyStore';
 import logo from '../../assets/logo.jpg';
 
-// ─── Types & Constants ────────────────────────────────────────────────────────
-
-type AuthStep = 'landing' | 'phone' | 'otp' | 'profile';
+// ─── Constants & Country Codes for Original Flow ──────────────────────────────
 
 const COUNTRY_CODES = [
   { code: '+91', flag: '🇮🇳', name: 'India' },
@@ -18,6 +16,50 @@ const COUNTRY_CODES = [
 
 const OTP_RESEND_SECONDS = 30;
 const DEV_OTP_HINT = import.meta.env.DEV ? '1234' : null;
+
+// ─── Localizations ────────────────────────────────────────────────────────────
+
+const localizedDemo = {
+  en: {
+    title: 'UGA',
+    subtitle: 'Healing Intelligence',
+    welcome: 'Welcome 🌿',
+    welcomeSub: 'Enter your credentials to access your personalized safe space.',
+    usernameLabel: 'Username',
+    usernamePlaceholder: 'Enter your username',
+    pinLabel: '4-Digit PIN Password',
+    pinPlaceholder: '••••',
+    signIn: 'Sign In',
+    authenticating: 'Signing in...',
+    footer: '© 2026 UGA',
+  },
+  ta: {
+    title: 'உகா',
+    subtitle: 'ஹீலிங் இன்டெலிஜென்ஸ்',
+    welcome: 'உகாவிற்கு வரவேற்கிறோம் 🌿',
+    welcomeSub: 'உங்கள் தனிப்பயனாக்கப்பட்ட பாதுகாப்பான இடத்தை அணுக உங்கள் விவரங்களை உள்ளிடவும்.',
+    usernameLabel: 'பயனர்பெயர்',
+    usernamePlaceholder: 'உங்கள் பயனர்பெயரை உள்ளிடவும்',
+    pinLabel: '4-இலக்க பின் கடவுச்சொல்',
+    pinPlaceholder: '••••',
+    signIn: 'உள்நுழைக',
+    authenticating: 'உள்நுழைகிறது...',
+    footer: '© 2026 UGA · அனைத்து பாதைகளும் வளர்ச்சிக்கே',
+  },
+  hi: {
+    title: 'उगा',
+    subtitle: 'हीलिंग इंटेलिजेंस',
+    welcome: 'उगा में आपका स्वागत है 🌿',
+    welcomeSub: 'अपने व्यक्तिगत सुरक्षित स्थान तक पहुँचने के लिए अपना विवरण दर्ज करें।',
+    usernameLabel: 'उपयोगकर्ता नाम',
+    usernamePlaceholder: 'अपना उपयोगकर्ता नाम दर्ज करें',
+    pinLabel: '4-अंकों का पिन पासवर्ड',
+    pinPlaceholder: '••••',
+    signIn: 'साइन इन करें',
+    authenticating: 'साइन इन हो रहा है...',
+    footer: '© 2026 UGA · सभी मार्ग समृद्धि की ओर ले जाते हैं',
+  },
+};
 
 const authLocalized = {
   en: {
@@ -54,7 +96,7 @@ const authLocalized = {
     dobLabel: 'Date of Birth',
     beginBtn: 'Begin My Journey 🌿',
     dayPrefix: 'Day ',
-    footer: '© 2026 UGA · All paths lead to flourishing',
+    footer: '© 2026 UGA',
   },
   ta: {
     title: 'உகா',
@@ -130,7 +172,55 @@ const authLocalized = {
   },
 };
 
+// ─── 5 Continuous Clicks Hook ──────────────────────────────────────────────────
+
+const useFiveClickToggle = () => {
+  const { toggleDemoMode } = useAuthStore();
+  const clickCountRef = useRef(0);
+  const lastClickTimeRef = useRef(0);
+
+  const handleLogoClick = () => {
+    const now = Date.now();
+    if (now - lastClickTimeRef.current < 1200) {
+      clickCountRef.current += 1;
+    } else {
+      clickCountRef.current = 1;
+    }
+    lastClickTimeRef.current = now;
+
+    if (clickCountRef.current >= 5) {
+      clickCountRef.current = 0;
+      toggleDemoMode();
+    }
+  };
+
+  return handleLogoClick;
+};
+
 // ─── Shared UI primitives ─────────────────────────────────────────────────────
+
+const AnimatedBackground: React.FC = () => (
+  <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
+    <div className="absolute inset-0 bg-[#FDFBF7]" />
+    <div className="absolute top-[-8%] right-[-8%] w-[55vw] h-[55vw] max-w-[340px] max-h-[340px] rounded-full bg-[#E2ECE9]/60 blur-[60px] auth-orb-1" />
+    <div className="absolute bottom-[-10%] left-[-5%] w-[50vw] h-[50vw] max-w-[300px] max-h-[300px] rounded-full bg-[#D1E2DD]/50 blur-[70px] auth-orb-2" />
+    {[...Array(4)].map((_, i) => (
+      <div
+        key={i}
+        className="absolute text-[#1B4332]/10 select-none"
+        style={{
+          fontSize: `${24 + i * 6}px`,
+          left: `${8 + i * 20}%`,
+          top: `${5 + (i * 22) % 75}%`,
+          animation: `auth-leaf-float ${5 + i * 0.8}s ease-in-out infinite alternate`,
+          animationDelay: `${i * 0.6}s`,
+        }}
+      >
+        🌿
+      </div>
+    ))}
+  </div>
+);
 
 const BackButton: React.FC<{ onClick: () => void; text: string }> = ({ onClick, text }) => (
   <button
@@ -144,17 +234,24 @@ const BackButton: React.FC<{ onClick: () => void; text: string }> = ({ onClick, 
   </button>
 );
 
-const UgaLogoHeader: React.FC<{ compact?: boolean; t: typeof authLocalized.en }> = ({ compact, t }) => (
-  <div className={`flex flex-col items-center ${compact ? 'mb-2' : 'mb-4'}`}>
-    <img
-      src={logo}
-      alt={t.title}
-      className="w-12 h-12 rounded-full object-cover border-2 border-[#1B4332]/20 shadow-sm mb-1.5"
-    />
-    <h1 className="text-[12px] font-black uppercase tracking-widest text-[#1B4332] leading-tight">{t.title}</h1>
-    <p className="text-[8px] font-bold tracking-[0.2em] uppercase text-gray-400">{t.healingIntelligence}</p>
-  </div>
-);
+const UgaLogoHeader: React.FC<{ compact?: boolean; t: typeof authLocalized.en }> = ({ compact, t }) => {
+  const handleFiveClicks = useFiveClickToggle();
+
+  return (
+    <div
+      onClick={handleFiveClicks}
+      className={`flex flex-col items-center cursor-pointer select-none group ${compact ? 'mb-2' : 'mb-4'}`}
+    >
+      <img
+        src={logo}
+        alt={t.title}
+        className="w-12 h-12 rounded-full object-cover border-2 border-[#1B4332]/20 shadow-sm mb-1.5 group-hover:scale-105 transition active:scale-95"
+      />
+      <h1 className="text-[12px] font-black uppercase tracking-widest text-[#1B4332] leading-tight">{t.title}</h1>
+      <p className="text-[8px] font-bold tracking-[0.2em] uppercase text-gray-400">{t.healingIntelligence}</p>
+    </div>
+  );
+};
 
 const PrimaryButton: React.FC<{
   id?: string;
@@ -186,120 +283,181 @@ const PrimaryButton: React.FC<{
   </button>
 );
 
-const TextInput: React.FC<{
-  id?: string;
-  type?: string;
-  inputMode?: 'numeric' | 'tel' | 'text';
-  value: string;
-  onChange: (v: string) => void;
-  onKeyDown?: (e: React.KeyboardEvent<HTMLInputElement>) => void;
-  placeholder?: string;
-  autoFocus?: boolean;
-}> = ({ id, type = 'text', inputMode, value, onChange, onKeyDown, placeholder, autoFocus }) => (
-  <input
-    id={id}
-    type={type}
-    inputMode={inputMode}
-    value={value}
-    onChange={(e) => onChange(e.target.value)}
-    onKeyDown={onKeyDown}
-    placeholder={placeholder}
-    autoFocus={autoFocus}
-    className="w-full h-11 px-4 rounded-xl bg-white border border-[#E2ECE9] text-gray-800 font-semibold text-sm placeholder-gray-350 focus:outline-none focus:border-[#1B4332]/50 focus:ring-2 focus:ring-[#1B4332]/10 transition shadow-sm"
-  />
-);
-
 const ErrorMsg: React.FC<{ msg: string | null }> = ({ msg }) =>
   msg ? <p className="text-red-500 text-xs font-semibold px-1 -mt-1">{msg}</p> : null;
 
-// ─── Animated Background (light cream theme) ──────────────────────────────────
+// ─── DEMO MODE SCREEN ─────────────────────────────────────────────────────────
 
-const AnimatedBackground: React.FC = () => (
-  <div className="absolute inset-0 overflow-hidden pointer-events-none">
-    {/* Warm cream base */}
-    <div className="absolute inset-0 bg-[#FDFBF7]" />
-    {/* Floating soft sage orbs */}
-    <div className="absolute top-[-8%] right-[-8%] w-[55vw] h-[55vw] max-w-[340px] max-h-[340px] rounded-full bg-[#E2ECE9]/60 blur-[60px] auth-orb-1" />
-    <div className="absolute bottom-[-10%] left-[-5%] w-[50vw] h-[50vw] max-w-[300px] max-h-[300px] rounded-full bg-[#D1E2DD]/50 blur-[70px] auth-orb-2" />
-    <div className="absolute top-[45%] left-[55%] w-[30vw] h-[30vw] max-w-[180px] max-h-[180px] rounded-full bg-[#F3F7F6]/80 blur-[40px] auth-orb-3" />
-    {/* Leaf accents */}
-    {[...Array(4)].map((_, i) => (
-      <div
-        key={i}
-        className="absolute text-[#1B4332]/10 select-none"
-        style={{
-          fontSize: `${24 + i * 6}px`,
-          left: `${8 + i * 20}%`,
-          top: `${5 + (i * 22) % 75}%`,
-          animation: `auth-leaf-float ${5 + i * 0.8}s ease-in-out infinite alternate`,
-          animationDelay: `${i * 0.6}s`,
-        }}
-      >
-        🌿
+const DemoUsernamePinScreen: React.FC = () => {
+  const [username, setUsername] = useState('');
+  const [pin, setPin] = useState('');
+  const { login, isLoading, error, clearError } = useAuthStore();
+  const language = useJourneyStore((s) => s.language);
+  const t = localizedDemo[language] || localizedDemo.en;
+  const handleFiveClicks = useFiveClickToggle();
+
+  const handleLogin = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    if (!username.trim() || pin.length < 4) return;
+    await login(username, pin);
+  };
+
+  return (
+    <div className="w-full h-full flex flex-col overflow-hidden relative bg-[#FDFBF7]">
+      <AnimatedBackground />
+
+      <div className="flex flex-col items-center justify-center flex-1 px-6 py-6 relative z-10 overflow-y-auto custom-scrollbar">
+        {/* Brand Logo & Header — Requires 5 continuous clicks to toggle mode */}
+        <div
+          onClick={handleFiveClicks}
+          className="flex flex-col items-center mb-6 cursor-pointer select-none group"
+        >
+          <img
+            src={logo}
+            alt={t.title}
+            className="w-16 h-16 rounded-full object-cover border-2 border-[#1B4332]/20 shadow-md mb-2 group-hover:scale-105 transition active:scale-95"
+          />
+          <h1 className="text-[14px] font-black uppercase tracking-widest text-[#1B4332] leading-tight">{t.title}</h1>
+          <p className="text-[9px] font-bold tracking-[0.2em] uppercase text-gray-400">{t.subtitle}</p>
+        </div>
+
+        {/* Welcome Text */}
+        <div className="text-center mb-6 max-w-xs">
+          <h2 className="text-gray-900 text-xl font-black leading-tight mb-1">
+            {t.welcome}
+          </h2>
+          <p className="text-gray-500 text-xs font-medium leading-relaxed">
+            {t.welcomeSub}
+          </p>
+        </div>
+
+        {/* Manual Credentials Form */}
+        <form onSubmit={handleLogin} className="w-full max-w-sm space-y-4 bg-white/80 dark:bg-gray-800/80 p-5 rounded-2xl border border-[#E2ECE9] dark:border-gray-700 shadow-sm backdrop-blur-xs">
+          <div>
+            <label className="block text-[#1B4332] dark:text-emerald-400 text-[10px] font-black uppercase tracking-wider mb-1.5">
+              {t.usernameLabel}
+            </label>
+            <input
+              id="auth-username-input"
+              type="text"
+              value={username}
+              onChange={(e) => { clearError(); setUsername(e.target.value); }}
+              placeholder={t.usernamePlaceholder}
+              className="w-full h-11 px-3.5 rounded-xl bg-white dark:bg-gray-900 border border-[#E2ECE9] dark:border-gray-700 text-gray-800 dark:text-white font-semibold text-xs focus:outline-none focus:border-[#1B4332] focus:ring-2 focus:ring-[#1B4332]/10 transition shadow-xs"
+              required
+              autoFocus
+            />
+          </div>
+
+          <div>
+            <label className="block text-[#1B4332] dark:text-emerald-400 text-[10px] font-black uppercase tracking-wider mb-1.5">
+              {t.pinLabel}
+            </label>
+            <input
+              id="auth-pin-input"
+              type="password"
+              inputMode="numeric"
+              maxLength={4}
+              value={pin}
+              onChange={(e) => { clearError(); setPin(e.target.value.replace(/\D/g, '').slice(0, 4)); }}
+              placeholder={t.pinPlaceholder}
+              className="w-full h-11 px-3.5 text-center font-mono tracking-widest text-lg rounded-xl bg-white dark:bg-gray-900 border border-[#E2ECE9] dark:border-gray-700 text-gray-800 dark:text-white font-black focus:outline-none focus:border-[#1B4332] focus:ring-2 focus:ring-[#1B4332]/10 transition shadow-xs"
+              required
+            />
+          </div>
+
+          {error && (
+            <p className="text-red-500 text-xs font-semibold text-center pt-0.5">{error}</p>
+          )}
+
+          <button
+            id="auth-login-btn"
+            type="submit"
+            disabled={isLoading || !username.trim() || pin.length < 4}
+            className={`w-full py-3.5 rounded-xl font-black text-xs uppercase tracking-wider transition-all duration-200 mt-2 ${
+              !isLoading && username.trim() && pin.length === 4
+                ? 'bg-[#1B4332] text-white hover:bg-[#2D6A4F] shadow-[0_6px_20px_rgba(27,67,50,0.25)] active:scale-[0.98]'
+                : 'bg-gray-200 dark:bg-gray-700 text-gray-400 dark:text-gray-500 cursor-not-allowed'
+            }`}
+          >
+            {isLoading ? t.authenticating : t.signIn}
+          </button>
+        </form>
       </div>
-    ))}
-  </div>
-);
 
-// ─── Step: Landing ────────────────────────────────────────────────────────────
+      {/* Footer */}
+      <div className="relative z-10 pb-3 px-6 text-center flex-shrink-0">
+        <p className="text-gray-350 text-[10px] font-semibold">
+          {t.footer}
+        </p>
+      </div>
+    </div>
+  );
+};
+
+// ─── ORIGINAL MULTI-STEP FLOW COMPONENTS ──────────────────────────────────────
 
 const LandingStep: React.FC<{
   onSignIn: () => void;
   onGuest: () => void;
   t: typeof authLocalized.en;
-}> = ({ onSignIn, onGuest, t }) => (
-  <div className="flex flex-col items-center justify-center flex-1 px-7 py-8 relative z-10 overflow-y-auto custom-scrollbar">
-    {/* Logo */}
-    <div className="flex flex-col items-center mb-8">
-      <img
-        src={logo}
-        alt={t.title}
-        className="w-16 h-16 rounded-full object-cover border-2 border-[#1B4332]/20 shadow-md mb-3"
-      />
-      <h1 className="text-[14px] font-black uppercase tracking-widest text-[#1B4332] leading-tight">{t.title}</h1>
-      <p className="text-[9px] font-bold tracking-[0.2em] uppercase text-gray-400">{t.healingIntelligence}</p>
-    </div>
+}> = ({ onSignIn, onGuest, t }) => {
+  const handleFiveClicks = useFiveClickToggle();
 
-    <div className="text-center mb-8">
-      <h2 className="text-gray-900 text-2xl font-black leading-tight mb-2">
-        {t.welcome}
-      </h2>
-      <p className="text-gray-500 text-sm font-medium leading-relaxed max-w-[240px] mx-auto">
-        {t.welcomeSub}
-      </p>
-    </div>
-
-    <div className="w-full max-w-[280px] space-y-3">
-      <button
-        id="auth-signin-btn"
-        onClick={onSignIn}
-        className="w-full py-4 rounded-2xl bg-[#1B4332] text-white font-black text-sm uppercase tracking-wider hover:bg-[#2D6A4F] active:scale-[0.98] transition-all duration-200 shadow-[0_6px_24px_rgba(27,67,50,0.22)]"
+  return (
+    <div className="flex flex-col items-center justify-center flex-1 px-7 py-8 relative z-10 overflow-y-auto custom-scrollbar">
+      <div
+        onClick={handleFiveClicks}
+        className="flex flex-col items-center mb-8 cursor-pointer select-none group"
       >
-        {t.signIn}
-      </button>
-
-      <div className="flex items-center space-x-3 py-0.5">
-        <div className="flex-1 h-px bg-gray-200" />
-        <span className="text-gray-350 text-[10px] font-bold uppercase tracking-wider">or</span>
-        <div className="flex-1 h-px bg-gray-200" />
+        <img
+          src={logo}
+          alt={t.title}
+          className="w-16 h-16 rounded-full object-cover border-2 border-[#1B4332]/20 shadow-md mb-3 group-hover:scale-105 transition active:scale-95"
+        />
+        <h1 className="text-[14px] font-black uppercase tracking-widest text-[#1B4332] leading-tight">{t.title}</h1>
+        <p className="text-[9px] font-bold tracking-[0.2em] uppercase text-gray-400">{t.healingIntelligence}</p>
       </div>
 
-      <button
-        id="auth-guest-btn"
-        onClick={onGuest}
-        className="w-full py-3.5 rounded-2xl border-2 border-[#1B4332]/20 text-[#1B4332] font-semibold text-sm hover:border-[#1B4332]/50 hover:bg-[#1B4332]/5 active:scale-[0.98] transition-all duration-200"
-      >
-        {t.guest}
-      </button>
+      <div className="text-center mb-8">
+        <h2 className="text-gray-900 text-2xl font-black leading-tight mb-2">
+          {t.welcome}
+        </h2>
+        <p className="text-gray-500 text-sm font-medium leading-relaxed max-w-[240px] mx-auto">
+          {t.welcomeSub}
+        </p>
+      </div>
 
-      <p className="text-center text-gray-350 text-[10px] font-medium pt-0.5">
-        {t.guestNote}
-      </p>
+      <div className="w-full max-w-[280px] space-y-3">
+        <button
+          id="auth-signin-btn"
+          onClick={onSignIn}
+          className="w-full py-4 rounded-2xl bg-[#1B4332] text-white font-black text-sm uppercase tracking-wider hover:bg-[#2D6A4F] active:scale-[0.98] transition-all duration-200 shadow-[0_6px_24px_rgba(27,67,50,0.22)]"
+        >
+          {t.signIn}
+        </button>
+
+        <div className="flex items-center space-x-3 py-0.5">
+          <div className="flex-1 h-px bg-gray-200" />
+          <span className="text-gray-350 text-[10px] font-bold uppercase tracking-wider">or</span>
+          <div className="flex-1 h-px bg-gray-200" />
+        </div>
+
+        <button
+          id="auth-guest-btn"
+          onClick={onGuest}
+          className="w-full py-3.5 rounded-2xl border-2 border-[#1B4332]/20 text-[#1B4332] font-semibold text-sm hover:border-[#1B4332]/50 hover:bg-[#1B4332]/5 active:scale-[0.98] transition-all duration-200"
+        >
+          {t.guest}
+        </button>
+
+        <p className="text-center text-gray-350 text-[10px] font-medium pt-0.5">
+          {t.guestNote}
+        </p>
+      </div>
     </div>
-  </div>
-);
-
-// ─── Step: Phone Entry ────────────────────────────────────────────────────────
+  );
+};
 
 const PhoneStep: React.FC<{
   onBack: () => void;
@@ -325,10 +483,8 @@ const PhoneStep: React.FC<{
       <BackButton onClick={onBack} text={t.back} />
 
       <div className="flex-1 flex flex-col justify-center">
-        {/* UGA Logo header */}
         <UgaLogoHeader t={t} />
 
-        {/* Step label */}
         <div className="flex items-center space-x-2 mb-4">
           <div className="w-6 h-6 rounded-full bg-[#1B4332] text-white flex items-center justify-center text-[10px] font-black flex-shrink-0">1</div>
           <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">{t.step1}</p>
@@ -336,13 +492,10 @@ const PhoneStep: React.FC<{
 
         <div className="mb-5">
           <h2 className="text-gray-900 text-xl font-black mb-1">{t.enterNum}</h2>
-          <p className="text-gray-400 text-sm font-medium">
-            {t.numSub}
-          </p>
+          <p className="text-gray-400 text-sm font-medium">{t.numSub}</p>
         </div>
 
         <div className="space-y-3">
-          {/* Country code + phone number row */}
           <div className="flex gap-2">
             <div className="relative flex-shrink-0">
               <button
@@ -403,8 +556,6 @@ const PhoneStep: React.FC<{
   );
 };
 
-// ─── Step: OTP Verification ───────────────────────────────────────────────────
-
 const OtpStep: React.FC<{
   onBack: () => void;
   onVerified: (isNewUser: boolean) => void;
@@ -441,21 +592,11 @@ const OtpStep: React.FC<{
     }
   };
 
-  const handlePaste = (e: React.ClipboardEvent) => {
-    const pasted = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, OTP_LENGTH);
-    if (pasted.length === OTP_LENGTH) {
-      setDigits(pasted.split(''));
-      inputRefs.current[OTP_LENGTH - 1]?.focus();
-      handleVerify(pasted);
-    }
-  };
-
   const handleVerify = async (otp: string) => {
     clearError();
     const ok = await verifyOtp(otp);
     if (ok) {
-      const state = useAuthStore.getState();
-      onVerified(!state.isAuthenticated);
+      onVerified(true);
     }
   };
 
@@ -475,10 +616,8 @@ const OtpStep: React.FC<{
       <BackButton onClick={onBack} text={t.back} />
 
       <div className="flex-1 flex flex-col justify-center">
-        {/* UGA Logo header */}
         <UgaLogoHeader t={t} />
 
-        {/* Step label */}
         <div className="flex items-center space-x-2 mb-4">
           <div className="w-6 h-6 rounded-full bg-[#1B4332] text-white flex items-center justify-center text-[10px] font-black flex-shrink-0">2</div>
           <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">{t.step2}</p>
@@ -498,8 +637,7 @@ const OtpStep: React.FC<{
         </div>
 
         <div className="space-y-4">
-          {/* 4-digit OTP boxes */}
-          <div className="flex space-x-3 justify-center" onPaste={handlePaste}>
+          <div className="flex space-x-3 justify-center">
             {Array.from({ length: OTP_LENGTH }).map((_, i) => (
               <input
                 key={i}
@@ -549,8 +687,6 @@ const OtpStep: React.FC<{
   );
 };
 
-// ─── Step: Profile Setup ──────────────────────────────────────────────────────
-
 const ProfileStep: React.FC<{ onDone: () => void; t: typeof authLocalized.en }> = ({ onDone, t }) => {
   const [name, setName] = useState('');
   const [gender, setGender] = useState<string>('female');
@@ -571,10 +707,8 @@ const ProfileStep: React.FC<{ onDone: () => void; t: typeof authLocalized.en }> 
   return (
     <div className="flex flex-col flex-1 px-7 py-4 relative z-10 overflow-y-auto custom-scrollbar">
       <div className="flex-1 flex flex-col justify-start pt-2">
-        {/* UGA Logo header */}
         <UgaLogoHeader compact t={t} />
 
-        {/* Step label */}
         <div className="flex items-center space-x-2 mb-3">
           <div className="w-6 h-6 rounded-full bg-[#1B4332] text-white flex items-center justify-center text-[10px] font-black flex-shrink-0">3</div>
           <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">{t.step3}</p>
@@ -582,27 +716,25 @@ const ProfileStep: React.FC<{ onDone: () => void; t: typeof authLocalized.en }> 
 
         <div className="mb-4">
           <h2 className="text-gray-900 text-lg font-black mb-0.5">{t.setupProfile}</h2>
-          <p className="text-gray-400 text-xs font-medium">
-            {t.profileSub}
-          </p>
+          <p className="text-gray-400 text-xs font-medium">{t.profileSub}</p>
         </div>
 
         <div className="space-y-4 pb-4">
-          {/* Name field */}
           <div>
             <label className="block text-[#1B4332] text-[10px] font-black uppercase tracking-wider mb-1.5">
               {t.nameLabel}
             </label>
-            <TextInput
+            <input
               id="auth-name-input"
+              type="text"
               value={name}
-              onChange={setName}
+              onChange={(e) => setName(e.target.value)}
               placeholder={t.namePlaceholder}
+              className="w-full h-11 px-4 rounded-xl bg-white border border-[#E2ECE9] text-gray-800 font-semibold text-sm placeholder-gray-350 focus:outline-none focus:border-[#1B4332]/50 focus:ring-2 focus:ring-[#1B4332]/10 transition shadow-sm"
               autoFocus
             />
           </div>
 
-          {/* Gender */}
           <div>
             <label className="block text-[#1B4332] text-[10px] font-black uppercase tracking-wider mb-1.5">
               {t.genderLabel}
@@ -625,34 +757,30 @@ const ProfileStep: React.FC<{ onDone: () => void; t: typeof authLocalized.en }> 
             </div>
           </div>
 
-          {/* Date of Birth */}
           <div>
             <label className="block text-[#1B4332] text-[10px] font-black uppercase tracking-wider mb-1.5">
               {t.dobLabel}
             </label>
             <div className="flex gap-2">
-              {/* Day */}
               <select
                 value={dob ? dob.split('-')[2] : '01'}
                 onChange={(e) => {
                   const parts = (dob || '2000-01-01').split('-');
                   setDob(`${parts[0]}-${parts[1]}-${e.target.value}`);
                 }}
-                className="flex-1 h-11 px-2.5 rounded-xl bg-white border border-[#E2ECE9] text-gray-800 font-semibold text-xs focus:outline-none focus:border-[#1B4332]/50 focus:ring-2 focus:ring-[#1B4332]/10 transition shadow-sm cursor-pointer"
+                className="flex-1 h-11 px-2.5 rounded-xl bg-white border border-[#E2ECE9] text-gray-800 font-semibold text-xs cursor-pointer"
               >
                 {Array.from({ length: 31 }, (_, i) => String(i + 1).padStart(2, '0')).map((d) => (
                   <option key={d} value={d}>{t.dayPrefix}{parseInt(d, 10)}</option>
                 ))}
               </select>
-
-              {/* Month */}
               <select
                 value={dob ? dob.split('-')[1] : '01'}
                 onChange={(e) => {
                   const parts = (dob || '2000-01-01').split('-');
                   setDob(`${parts[0]}-${e.target.value}-${parts[2]}`);
                 }}
-                className="flex-1 h-11 px-2.5 rounded-xl bg-white border border-[#E2ECE9] text-gray-800 font-semibold text-xs focus:outline-none focus:border-[#1B4332]/50 focus:ring-2 focus:ring-[#1B4332]/10 transition shadow-sm cursor-pointer"
+                className="flex-1 h-11 px-2.5 rounded-xl bg-white border border-[#E2ECE9] text-gray-800 font-semibold text-xs cursor-pointer"
               >
                 {[
                   { num: '01', name: 'Jan' }, { num: '02', name: 'Feb' }, { num: '03', name: 'Mar' },
@@ -663,15 +791,13 @@ const ProfileStep: React.FC<{ onDone: () => void; t: typeof authLocalized.en }> 
                   <option key={m.num} value={m.num}>{m.name}</option>
                 ))}
               </select>
-
-              {/* Year */}
               <select
                 value={dob ? dob.split('-')[0] : '2000'}
                 onChange={(e) => {
                   const parts = (dob || '2000-01-01').split('-');
                   setDob(`${e.target.value}-${parts[1]}-${parts[2]}`);
                 }}
-                className="flex-1 h-11 px-2.5 rounded-xl bg-white border border-[#E2ECE9] text-gray-800 font-semibold text-xs focus:outline-none focus:border-[#1B4332]/50 focus:ring-2 focus:ring-[#1B4332]/10 transition shadow-sm cursor-pointer"
+                className="flex-1 h-11 px-2.5 rounded-xl bg-white border border-[#E2ECE9] text-gray-800 font-semibold text-xs cursor-pointer"
               >
                 {Array.from({ length: 90 }, (_, i) => String(new Date().getFullYear() - i)).map((y) => (
                   <option key={y} value={y}>{y}</option>
@@ -693,25 +819,16 @@ const ProfileStep: React.FC<{ onDone: () => void; t: typeof authLocalized.en }> 
   );
 };
 
-// ─── Main AuthScreen ──────────────────────────────────────────────────────────
-
-export const AuthScreen: React.FC<{ initialStep?: AuthStep }> = ({ initialStep = 'landing' }) => {
+const OriginalAuthFlowScreen: React.FC<{ initialStep?: AuthStep }> = ({ initialStep = 'landing' }) => {
   const [step, setStep] = useState<AuthStep>(initialStep);
   const { continueAsGuest } = useAuthStore();
   const language = useJourneyStore((s) => s.language);
   const t = authLocalized[language] || authLocalized.en;
 
-  const handleOtpVerified = (isNewUser: boolean) => {
-    if (isNewUser) {
-      setStep('profile');
-    }
-  };
-
   return (
-    <div className="w-full h-full flex flex-col overflow-hidden relative">
+    <div className="w-full h-full flex flex-col overflow-hidden relative bg-[#FDFBF7]">
       <AnimatedBackground />
 
-      {/* Progress dots */}
       {step !== 'landing' && (
         <div className="relative z-10 flex justify-center space-x-1.5 pt-4 pb-0 flex-shrink-0">
           {(['phone', 'otp', 'profile'] as AuthStep[]).map((s, i) => {
@@ -728,7 +845,6 @@ export const AuthScreen: React.FC<{ initialStep?: AuthStep }> = ({ initialStep =
         </div>
       )}
 
-      {/* Steps */}
       {step === 'landing' && (
         <LandingStep
           onSignIn={() => setStep('phone')}
@@ -746,15 +862,14 @@ export const AuthScreen: React.FC<{ initialStep?: AuthStep }> = ({ initialStep =
       {step === 'otp' && (
         <OtpStep
           onBack={() => setStep('phone')}
-          onVerified={handleOtpVerified}
+          onVerified={() => setStep('profile')}
           t={t}
         />
       )}
       {step === 'profile' && (
-        <ProfileStep onDone={() => {/* AuthStore sets isAuthenticated, overlay disappears */}} t={t} />
+        <ProfileStep onDone={() => {}} t={t} />
       )}
 
-      {/* Footer */}
       <div className="relative z-10 pb-3 px-7 text-center flex-shrink-0">
         <p className="text-gray-300 text-[10px] font-semibold">
           {t.footer}
@@ -762,6 +877,17 @@ export const AuthScreen: React.FC<{ initialStep?: AuthStep }> = ({ initialStep =
       </div>
     </div>
   );
+};
+
+// ─── MAIN AUTH SCREEN ─────────────────────────────────────────────────────────
+
+export const AuthScreen: React.FC<{ initialStep?: AuthStep }> = ({ initialStep = 'landing' }) => {
+  const demoMode = useAuthStore((s) => s.demoMode);
+
+  if (demoMode) {
+    return <DemoUsernamePinScreen />;
+  }
+  return <OriginalAuthFlowScreen initialStep={initialStep} />;
 };
 
 export default AuthScreen;

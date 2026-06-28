@@ -23,21 +23,29 @@ export type AuthStep =
 
 interface AuthStore {
   // State
+  demoMode: boolean;
   user: UserProfile | null;
   isGuest: boolean;
   isAuthenticated: boolean;
 
   // Guest daily limit tracking
   guestChatsToday: number;
-  guestLastChatDate: string; // ISO date string yyyy-mm-dd
+  guestLastChatDate: string;
 
-  // OTP flow temp state (not persisted between page reloads intentionally)
+  // OTP flow temp state
   pendingPhone: string;
   otpSent: boolean;
   isLoading: boolean;
   error: string | null;
 
-  // Actions — OTP flow
+  // Actions — Demo Mode Toggle
+  setDemoMode: (val: boolean) => void;
+  toggleDemoMode: () => void;
+
+  // Actions — Demo Login
+  login: (username: string, pin: string) => Promise<boolean>;
+
+  // Actions — OTP & Profile flow
   sendOtp: (phone: string) => Promise<boolean>;
   verifyOtp: (otp: string) => Promise<boolean>;
   completeProfile: (name: string, language: 'en' | 'ta' | 'hi', gender?: string, dob?: string) => void;
@@ -50,12 +58,8 @@ interface AuthStore {
   // Actions — General
   logout: () => void;
   clearError: () => void;
-
-  // For upgrading guest → full account (merge prompt handled in UI)
   upgradeGuestToUser: (user: UserProfile) => void;
 }
-
-// ─── Avatar Colors (cycling palette) ────────────────────────────────────────
 
 const AVATAR_COLORS = [
   '#1B4332', '#2D6A4F', '#40916C', '#52B788',
@@ -63,45 +67,33 @@ const AVATAR_COLORS = [
 ];
 
 const getAvatarColor = (id: string): string => {
-  const idx = id.charCodeAt(0) % AVATAR_COLORS.length;
+  let hash = 0;
+  for (let i = 0; i < id.length; i++) {
+    hash = id.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  const idx = Math.abs(hash) % AVATAR_COLORS.length;
   return AVATAR_COLORS[idx];
 };
 
-// ─── Mock API helpers ─────────────────────────────────────────────────────────
-
 const MOCK_OTP = '1234';
-const DEV_MODE = import.meta.env.DEV;
 
-// Simulates a network call — swap with real API later
-const mockSendOtp = async (phone: string): Promise<{ success: boolean }> => {
-  await new Promise((r) => setTimeout(r, 1200)); // Simulate latency
-  if (DEV_MODE) {
-    console.info(`[UGA Auth Mock] OTP for ${phone}: ${MOCK_OTP}`);
-  }
+const mockSendOtp = async (_phone: string): Promise<{ success: boolean }> => {
+  await new Promise((r) => setTimeout(r, 1000));
   return { success: true };
 };
 
-const mockVerifyOtp = async (
-  _phone: string,
-  otp: string
-): Promise<{ success: boolean; isNewUser: boolean; userId: string }> => {
-  await new Promise((r) => setTimeout(r, 900));
-  if (otp !== MOCK_OTP) {
-    return { success: false, isNewUser: false, userId: '' };
-  }
-  // Mock: Always treat as new user so step 3 of 3 (Profile Creation) is shown.
+const mockVerifyOtp = async (_phone: string, otp: string): Promise<{ success: boolean; isNewUser: boolean; userId: string }> => {
+  await new Promise((r) => setTimeout(r, 800));
+  if (otp !== MOCK_OTP) return { success: false, isNewUser: false, userId: '' };
   return { success: true, isNewUser: true, userId: `user-${Date.now()}` };
 };
 
-// ─── Today's date key ─────────────────────────────────────────────────────────
-
-const todayKey = (): string => new Date().toISOString().slice(0, 10); // yyyy-mm-dd
-
-// ─── Store ────────────────────────────────────────────────────────────────────
+const todayKey = (): string => new Date().toISOString().slice(0, 10);
 
 export const useAuthStore = create<AuthStore>()(
   persist(
     (set, get) => ({
+      demoMode: true, // Enabled by default as requested
       user: null,
       isGuest: false,
       isAuthenticated: false,
@@ -112,7 +104,40 @@ export const useAuthStore = create<AuthStore>()(
       isLoading: false,
       error: null,
 
-      // ── Send OTP ──────────────────────────────────────────────────────────
+      setDemoMode: (val: boolean) => set({ demoMode: val }),
+      toggleDemoMode: () => set((s) => ({ demoMode: !s.demoMode })),
+
+      // ── Demo Login Action ─────────────────────────────────────────────────
+      login: async (username: string, pin: string) => {
+        set({ isLoading: true, error: null });
+        await new Promise((r) => setTimeout(r, 400));
+        
+        const cleanName = username.trim();
+
+        if (!cleanName) {
+          set({ error: 'Please enter your username.', isLoading: false });
+          return false;
+        }
+
+        if (pin !== '1234') {
+          set({ error: 'Incorrect PIN. Please try again.', isLoading: false });
+          return false;
+        }
+
+        const user: UserProfile = {
+          id: `user-${cleanName.toLowerCase().replace(/\s+/g, '-')}`,
+          name: cleanName,
+          phone: '',
+          language: 'en',
+          avatarColor: getAvatarColor(cleanName),
+          createdAt: new Date().toISOString(),
+        };
+
+        set({ user, isAuthenticated: true, isGuest: false, isLoading: false, error: null });
+        return true;
+      },
+
+      // ── Original OTP & Profile Actions ─────────────────────────────────────
       sendOtp: async (phone: string) => {
         set({ isLoading: true, error: null, pendingPhone: phone });
         try {
@@ -120,57 +145,32 @@ export const useAuthStore = create<AuthStore>()(
           if (res.success) {
             set({ otpSent: true, isLoading: false });
             return true;
-          } else {
-            set({ error: 'Failed to send OTP. Try again.', isLoading: false });
-            return false;
           }
+          set({ error: 'Failed to send OTP. Try again.', isLoading: false });
+          return false;
         } catch {
           set({ error: 'Network error. Please try again.', isLoading: false });
           return false;
         }
       },
 
-      // ── Verify OTP ────────────────────────────────────────────────────────
       verifyOtp: async (otp: string) => {
         const { pendingPhone } = get();
         set({ isLoading: true, error: null });
         try {
           const res = await mockVerifyOtp(pendingPhone, otp);
           if (res.success) {
-            if (!res.isNewUser) {
-              // Existing user — auto-create a minimal profile for mock
-              const user: UserProfile = {
-                id: res.userId,
-                name: 'User',
-                phone: pendingPhone,
-                language: 'en',
-                avatarColor: getAvatarColor(res.userId),
-                createdAt: new Date().toISOString(),
-              };
-              set({
-                user,
-                isAuthenticated: true,
-                isGuest: false,
-                isLoading: false,
-                otpSent: false,
-              });
-            } else {
-              // New user — signal UI to show profile step
-              // Store the userId temporarily in pendingPhone slot via a side approach
-              set({ isLoading: false });
-            }
+            set({ isLoading: false });
             return true;
-          } else {
-            set({ error: 'Incorrect OTP. Please try again.', isLoading: false });
-            return false;
           }
+          set({ error: 'Incorrect OTP. Please try again.', isLoading: false });
+          return false;
         } catch {
           set({ error: 'Verification failed. Please try again.', isLoading: false });
           return false;
         }
       },
 
-      // ── Complete Profile (new user) ───────────────────────────────────────
       completeProfile: (name: string, language: 'en' | 'ta' | 'hi', gender?: string, dob?: string) => {
         const { pendingPhone } = get();
         const userId = `user-${Date.now()}`;
@@ -194,7 +194,6 @@ export const useAuthStore = create<AuthStore>()(
         });
       },
 
-      // ── Guest Mode ────────────────────────────────────────────────────────
       continueAsGuest: () => {
         set({ isGuest: true, isAuthenticated: true });
       },
@@ -203,7 +202,7 @@ export const useAuthStore = create<AuthStore>()(
         const { guestChatsToday, guestLastChatDate, isGuest } = get();
         if (!isGuest) return true;
         const today = todayKey();
-        if (guestLastChatDate !== today) return true; // new day, reset
+        if (guestLastChatDate !== today) return true;
         return guestChatsToday < 2;
       },
 
@@ -217,7 +216,6 @@ export const useAuthStore = create<AuthStore>()(
         }
       },
 
-      // ── Upgrade Guest → Full User ─────────────────────────────────────────
       upgradeGuestToUser: (user: UserProfile) => {
         set({
           user,
@@ -228,7 +226,6 @@ export const useAuthStore = create<AuthStore>()(
         });
       },
 
-      // ── Logout ────────────────────────────────────────────────────────────
       logout: () => {
         set({
           user: null,
@@ -246,8 +243,8 @@ export const useAuthStore = create<AuthStore>()(
     }),
     {
       name: 'uga-auth',
-      // Only persist these fields — skip transient UI state
       partialize: (state) => ({
+        demoMode: state.demoMode,
         user: state.user,
         isGuest: state.isGuest,
         isAuthenticated: state.isAuthenticated,
