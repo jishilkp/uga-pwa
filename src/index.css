@@ -82,3 +82,53 @@ body.dark {
   background: rgba(17, 24, 39, 0.75);
   border: 1px solid rgba(255, 255, 255, 0.08);
 }
+
+/* ─── Auth Screen Animations ─────────────────────────────────────────────── */
+
+@keyframes auth-orb-drift-1 {
+  0%   { transform: translate(0, 0) scale(1); }
+  50%  { transform: translate(30px, -20px) scale(1.05); }
+  100% { transform: translate(0, 0) scale(1); }
+}
+
+@keyframes auth-orb-drift-2 {
+  0%   { transform: translate(0, 0) scale(1); }
+  50%  { transform: translate(-25px, 35px) scale(0.95); }
+  100% { transform: translate(0, 0) scale(1); }
+}
+
+@keyframes auth-orb-drift-3 {
+  0%   { transform: translate(0, 0) scale(1); }
+  50%  { transform: translate(15px, 20px) scale(1.08); }
+  100% { transform: translate(0, 0) scale(1); }
+}
+
+@keyframes auth-leaf-float {
+  0%   { transform: translateY(0) rotate(0deg); opacity: 0.15; }
+  100% { transform: translateY(-18px) rotate(12deg); opacity: 0.3; }
+}
+
+.auth-orb-1 { animation: auth-orb-drift-1 10s ease-in-out infinite; }
+.auth-orb-2 { animation: auth-orb-drift-2 13s ease-in-out infinite; }
+.auth-orb-3 { animation: auth-orb-drift-3 8s ease-in-out infinite; }
+
+/* Slide in from bottom utility (used by modals/sheets) */
+@keyframes slide-in-from-bottom {
+  from { transform: translateY(100%); opacity: 0; }
+  to   { transform: translateY(0);    opacity: 1; }
+}
+
+.animate-in.slide-in-from-bottom {
+  animation: slide-in-from-bottom 0.32s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Fade in utility */
+@keyframes fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.animate-in.fade-in {
+  animation: fade-in 0.2s ease forwards;
+}
+

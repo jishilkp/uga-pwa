@@ -4,6 +4,11 @@ import type { Message } from './store/journeyStore';
 import { MessageBubble } from './components/chat/MessageBubble';
 import { RecommendationCard } from './components/chat/RecommendationCard';
 import { CrisisOverlay } from './components/chat/CrisisOverlay';
+import { GuestUpgradeBanner } from './components/auth/GuestUpgradeBanner';
+import { GuestLimitModal } from './components/auth/GuestLimitModal';
+import { ProfileSheet } from './components/auth/ProfileSheet';
+import { AuthScreen } from './components/auth/AuthScreen';
+import { useAuthStore } from './store/authStore';
 import { 
   Paperclip, 
   Mic, 
@@ -165,6 +170,11 @@ export const App: React.FC = () => {
   const [activeScrollSection, setActiveScrollSection] = useState<'overview' | 'problem' | 'architecture' | 'stages' | 'trust'>('overview');
   const [activeJourneyStage, setActiveJourneyStage] = useState<number>(0);
   const [isMobileDevice, setIsMobileDevice] = useState(false);
+
+  // Auth state
+  const { user, isGuest, isAuthenticated, canStartGuestChat, incrementGuestChat, logout } = useAuthStore();
+  const [isProfileSheetOpen, setIsProfileSheetOpen] = useState(false);
+  const [isGuestLimitModalOpen, setIsGuestLimitModalOpen] = useState(false);
 
   const webScrollContainerRef = useRef<HTMLDivElement>(null);
   const overviewRef = useRef<HTMLDivElement>(null);
@@ -354,8 +364,14 @@ export const App: React.FC = () => {
   const handleSend = () => {
     if (inputText.trim() === '') return;
     if (!activeThreadId) {
+      // Gate new thread creation for guest users
+      if (isGuest && !canStartGuestChat()) {
+        setIsGuestLimitModalOpen(true);
+        return;
+      }
       const newId = createNewThread(inputText, inputText);
       switchThread(newId);
+      if (isGuest) incrementGuestChat();
     } else {
       sendMessage(inputText);
     }
@@ -460,7 +476,7 @@ export const App: React.FC = () => {
   const uiText = {
     en: {
       title: "UGA",
-      healingIntelligence: "Healing Intelligence",
+      healingIntelligence: "Healing\nIntelligence",
       greeting: "Hi, I'm Uga",
       tagline: 'Your companion for emotional well-being.',
       desc: 'Talk, share or ask anything. I\'m here to listen, support and guide you.',
@@ -478,7 +494,7 @@ export const App: React.FC = () => {
     },
     ta: {
       title: "உகா",
-      healingIntelligence: "ஹீலிங் இன்டெலிஜென்ஸ்",
+      healingIntelligence: "ஹீலிங்\nஇன்டெலிஜென்ஸ்",
       greeting: 'வணக்கம், நான் உகா',
       tagline: 'உணர்ச்சி நல்வாழ்வுக்கான உங்கள் துணை.',
       desc: 'பேசுங்கள், பகிர்ந்து கொள்ளுங்கள் அல்லது கேளுங்கள். நான் கேட்க, ஆதரிக்க மற்றும் வழிநடத்த இங்கே இருக்கிறேன்.',
@@ -526,8 +542,14 @@ export const App: React.FC = () => {
   // Quick suggestion card click handler
   const handleSuggestionClick = (suggestionText: string) => {
     if (!activeThreadId) {
+      // Gate new thread creation for guest users
+      if (isGuest && !canStartGuestChat()) {
+        setIsGuestLimitModalOpen(true);
+        return;
+      }
       const newId = createNewThread(suggestionText, suggestionText);
       switchThread(newId);
+      if (isGuest) incrementGuestChat();
     } else {
       sendMessage(suggestionText);
     }
@@ -539,9 +561,34 @@ export const App: React.FC = () => {
     { code: 'hi', label: 'हिंदी' }
   ];
 
+  // Profile icon button shared between both header locations
+  const ProfileIconButton = () => {
+    if (!user) return null;
+    return (
+      <button
+        id="profile-icon-btn"
+        onClick={(e) => {
+          e.stopPropagation();
+          setIsProfileSheetOpen(true);
+        }}
+        title="Profile"
+        className="flex items-center justify-center p-1.5 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+      >
+        <div
+          className="w-7 h-7 rounded-full flex items-center justify-center text-white text-[11px] font-black shadow-sm"
+          style={{ backgroundColor: user.avatarColor }}
+        >
+          {user.name.charAt(0).toUpperCase()}
+        </div>
+      </button>
+    );
+  };
+
   return (
     <div className="w-screen h-screen flex flex-col lg:flex-row overflow-hidden bg-[#FDFBF7] text-gray-855 transition-colors duration-300">
       <input type="file" ref={fileInputRef} onChange={handleFileSelect} className="hidden" accept="image/*,video/*,audio/*,.pdf,.doc,.docx" />
+
+
       {/* Left Column: Brand Marketing Content (visible only on desktop) */}
       {!isMobileDevice && (
         <div ref={webScrollContainerRef} className="hidden lg:flex lg:flex-col lg:flex-1 h-screen overflow-y-auto bg-[#FDFBF7] dark:bg-gray-955 transition-colors duration-300 relative">
@@ -886,30 +933,60 @@ export const App: React.FC = () => {
           <div className={`flex-1 flex flex-col overflow-hidden relative ${
             isMobileDevice ? 'rounded-none' : 'rounded-[36px]'
           }`}>
-        
+
+        {/* AUTH OVERLAY — covers only the app column, website is unaffected */}
+        {!isAuthenticated && (
+          <div className="absolute inset-0 z-[100] overflow-hidden">
+            <AuthScreen />
+          </div>
+        )}
+
+        {/* PROFILE SHEET — scoped to app column only */}
+        {isProfileSheetOpen && (
+          <ProfileSheet
+            onClose={() => setIsProfileSheetOpen(false)}
+            onSignUp={() => {
+              setIsProfileSheetOpen(false);
+              logout();
+            }}
+          />
+        )}
+
+        {/* GUEST LIMIT MODAL — scoped to app column only */}
+        {isGuestLimitModalOpen && (
+          <GuestLimitModal
+            onClose={() => setIsGuestLimitModalOpen(false)}
+            onSignUp={() => {
+              setIsGuestLimitModalOpen(false);
+              logout();
+            }}
+          />
+        )}
+
         {/* 1. SAFETY OVERLAY INTERCEPTOR */}
         {activeThread?.systemAction === 'SAFETY_BREAKOUT_CRISIS' && (
           <CrisisOverlay />
         )}
 
+
       {/* Top Header - Rendered only on active chat screen */}
       {messages.length > 0 && (
-        <header className="glass-panel sticky top-0 z-40 w-full px-4 py-3 flex items-center justify-between border-b border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900">
+        <header className="glass-panel sticky top-0 z-40 w-full px-2 py-2.5 flex items-center justify-between border-b border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900">
           {/* Brand Logo & Name (Clickable to return Home/Dashboard) */}
           <div 
             onClick={() => switchThread(null)}
-            className="flex items-center space-x-2 cursor-pointer hover:opacity-85 transition active:scale-[0.98]"
+            className="flex items-center space-x-1.5 flex-shrink-0 cursor-pointer hover:opacity-85 transition active:scale-[0.98] -ml-0.5"
             title="Return to Home"
           >
-            <img src={logo} alt="UGA Healing Intelligence" className="w-10 h-10 rounded-full object-cover border border-uga-sage/40 dark:border-gray-800 dark:brightness-110" />
-            <div className="text-left">
-              <h1 className="text-[13.5px] font-black uppercase tracking-wider text-uga-forest dark:text-emerald-400 leading-tight">{localizedUi.title}</h1>
-              <p className="text-[9px] font-bold tracking-widest text-gray-400 dark:text-gray-500 uppercase leading-none mt-0.5">{localizedUi.healingIntelligence}</p>
+            <img src={logo} alt="UGA Healing Intelligence" className="w-8.5 h-8.5 rounded-full object-cover border border-uga-sage/40 dark:border-gray-800 dark:brightness-110 flex-shrink-0" />
+            <div className="text-left flex-shrink-0">
+              <h1 className="text-[12.5px] font-black uppercase tracking-wider text-uga-forest dark:text-emerald-400 leading-tight">{localizedUi.title}</h1>
+              <p className="text-[8px] font-bold tracking-wider text-gray-400 dark:text-gray-500 uppercase leading-[1.05] mt-0.5 whitespace-pre-line">{localizedUi.healingIntelligence}</p>
             </div>
           </div>
 
           {/* Dropdown Language Selector & Theme Toggle */}
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center space-x-1 flex-shrink-0">
             <button 
               onClick={(e) => {
                 e.stopPropagation();
@@ -927,7 +1004,7 @@ export const App: React.FC = () => {
                 setIsDarkMode(!isDarkMode);
                 setIsLangDropdownOpen(false);
               }}
-              className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors text-uga-forest"
+              className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors text-uga-forest dark:text-emerald-400"
             >
               {isDarkMode ? <Sun size={15} /> : <Moon size={15} />}
             </button>
@@ -939,16 +1016,16 @@ export const App: React.FC = () => {
                   e.stopPropagation();
                   setIsLangDropdownOpen(!isLangDropdownOpen);
                 }}
-                className="flex items-center space-x-1 px-2.5 py-1.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-xs font-bold text-gray-700 dark:text-gray-200 shadow-sm transition active:scale-95"
+                className="flex items-center space-x-1 px-2 py-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-[11px] font-bold text-gray-700 dark:text-gray-200 shadow-sm transition active:scale-95"
               >
-                <Globe size={12} className="text-uga-forest dark:text-emerald-400" />
+                <Globe size={11} className="text-uga-forest dark:text-emerald-400" />
                 <span>{langNames[language]}</span>
-                <ChevronDown size={10} />
+                <ChevronDown size={9} />
               </button>
 
               {/* Language Dropdown List */}
               {isLangDropdownOpen && (
-                <div className="absolute right-0 top-9 w-28 bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-xl shadow-lg z-50 overflow-hidden divide-y divide-gray-50 dark:divide-gray-800 animate-in fade-in slide-in-from-top-2 duration-200">
+                <div className="absolute right-0 top-8 w-28 bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-xl shadow-2xl z-[100] overflow-hidden divide-y divide-gray-50 dark:divide-gray-800 animate-in fade-in slide-in-from-top-2 duration-200">
                   {Object.entries(langNames).map(([code, name]) => (
                     <button
                       key={code}
@@ -967,6 +1044,7 @@ export const App: React.FC = () => {
                 </div>
               )}
             </div>
+            <ProfileIconButton />
           </div>
         </header>
       )}
@@ -983,17 +1061,17 @@ export const App: React.FC = () => {
             <div className="flex flex-col items-center text-center py-4 px-1">
               
               {/* Inline Landing Header (matching mockup align - replaces top header) */}
-              <div className="w-full max-w-sm flex items-center justify-between mb-8 mt-2">
-                <div className="flex items-center space-x-2">
-                  <img src={logo} alt="UGA Healing Intelligence" className="w-10 h-10 rounded-full object-cover border border-uga-sage/40 dark:border-gray-800 dark:brightness-110" />
-                  <div className="text-left">
-                    <h1 className="text-[13.5px] font-black uppercase tracking-wider text-uga-forest dark:text-emerald-400 leading-tight">{localizedUi.title}</h1>
-                    <p className="text-[9px] font-bold tracking-widest text-gray-400 dark:text-gray-555 uppercase leading-none mt-0.5">{localizedUi.healingIntelligence}</p>
+              <div className="w-full flex items-center justify-between mb-6 mt-1 px-0 relative z-30">
+                <div className="flex items-center space-x-1.5 flex-shrink-0 -ml-0.5">
+                  <img src={logo} alt="UGA Healing Intelligence" className="w-8.5 h-8.5 rounded-full object-cover border border-uga-sage/40 dark:border-gray-800 dark:brightness-110 flex-shrink-0" />
+                  <div className="text-left flex-shrink-0">
+                    <h1 className="text-[12.5px] font-black uppercase tracking-wider text-uga-forest dark:text-emerald-400 leading-tight">{localizedUi.title}</h1>
+                    <p className="text-[8px] font-bold tracking-wider text-gray-400 dark:text-gray-555 uppercase leading-[1.05] mt-0.5 whitespace-pre-line">{localizedUi.healingIntelligence}</p>
                   </div>
                 </div>
                 
                 {/* Header Actions */}
-                <div className="flex items-center space-x-2">
+                <div className="flex items-center space-x-1 flex-shrink-0">
                   <button 
                     onClick={(e) => {
                       e.stopPropagation();
@@ -1023,15 +1101,15 @@ export const App: React.FC = () => {
                         e.stopPropagation();
                         setIsLangDropdownOpen(!isLangDropdownOpen);
                       }}
-                      className="flex items-center space-x-1 px-2.5 py-1.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-xs font-bold text-gray-700 dark:text-gray-200 shadow-sm transition active:scale-95"
+                      className="flex items-center space-x-1 px-2 py-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-[11px] font-bold text-gray-700 dark:text-gray-200 shadow-sm transition active:scale-95"
                     >
-                      <Globe size={12} className="text-uga-forest dark:text-emerald-400" />
+                      <Globe size={11} className="text-uga-forest dark:text-emerald-400" />
                       <span>{langNames[language]}</span>
-                      <ChevronDown size={10} />
+                      <ChevronDown size={9} />
                     </button>
 
                     {isLangDropdownOpen && (
-                      <div className="absolute right-0 top-9 w-28 bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-xl shadow-lg z-50 overflow-hidden divide-y divide-gray-50 dark:divide-gray-800 animate-in fade-in slide-in-from-top-2 duration-200">
+                      <div className="absolute right-0 top-8 w-28 bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-xl shadow-2xl z-[100] overflow-hidden divide-y divide-gray-50 dark:divide-gray-800 animate-in fade-in slide-in-from-top-2 duration-200">
                         {Object.entries(langNames).map(([code, name]) => (
                           <button
                             key={code}
@@ -1041,7 +1119,7 @@ export const App: React.FC = () => {
                               setIsLangDropdownOpen(false);
                             }}
                             className={`w-full px-3 py-2 text-xs text-left font-semibold hover:bg-uga-sageLight dark:hover:bg-gray-800 ${
-                              language === code ? 'text-uga-forest dark:text-emerald-400 bg-uga-sageLight/60 dark:bg-gray-800/60' : 'text-gray-600'
+                              language === code ? 'text-uga-forest dark:text-emerald-400 bg-uga-sageLight/60 dark:bg-gray-800/60' : 'text-gray-600 dark:text-gray-300'
                             }`}
                           >
                             {name}
@@ -1050,8 +1128,16 @@ export const App: React.FC = () => {
                       </div>
                     )}
                   </div>
+                  <ProfileIconButton />
                 </div>
               </div>
+
+              {/* Guest Upgrade Banner */}
+              {isGuest && (
+                <GuestUpgradeBanner
+                  onSignUp={() => logout()}
+                />
+              )}
 
               {/* UGA Brand Logo */}
               <img src={logo} alt="UGA Healing Intelligence" className="w-16 h-16 rounded-full object-cover border border-uga-sage/40 dark:border-gray-800 mb-4 dark:brightness-110" />
