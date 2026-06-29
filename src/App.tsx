@@ -1175,12 +1175,13 @@ export const App: React.FC = () => {
                 {/* Input Controls row inside card */}
                 <div className="flex items-center justify-between mt-2.5 pt-2.5 border-t border-gray-50 dark:border-gray-800">
                   <div className="flex items-center space-x-3.5 text-gray-400">
-                    <button 
+                    {/* Attachment icon hidden */}
+                    {/* <button 
                       onClick={handleAttachmentClick}
                       className="p-1 hover:text-uga-forest transition"
                     >
                       <Paperclip size={18} />
-                    </button>
+                    </button> */}
                     
                     <button 
                       onClick={handleMicClick}
@@ -1347,12 +1348,13 @@ export const App: React.FC = () => {
           <div className="flex-shrink-0 bg-[#FDFBF7] dark:bg-gray-900 px-4 pb-3.5 pt-1.5 z-40">
             <div className="glass-panel rounded-2xl p-3 flex items-center justify-between border border-uga-sageDark dark:border-gray-800 shadow-lg">
               
-              <button 
+              {/* Attachment icon hidden */}
+              {/* <button 
                 onClick={handleAttachmentClick}
                 className="p-1.5 text-gray-400 hover:text-uga-forest dark:hover:text-emerald-400 rounded-xl transition active:scale-95"
               >
                 <Paperclip size={18} />
-              </button>
+              </button> */}
 
               {isRecording ? (
                 <div className="flex-1 px-3 flex items-center justify-between">
