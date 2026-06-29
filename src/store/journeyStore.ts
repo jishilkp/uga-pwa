@@ -3,6 +3,7 @@ import { persist } from 'zustand/middleware';
 import { getMockResponse } from '../services/mockOrchestrator';
 import type { JourneyMetadata, Recommendation } from '../services/mockOrchestrator';
 import { useAuthStore } from './authStore';
+import { sendChatMessage } from '../services/chatApi';
 
 export interface Attachment {
   name: string;
@@ -206,14 +207,13 @@ export const useJourneyStore = create<JourneyStore>()(
     });
   },
 
-  sendMessage: (text) => {
+  sendMessage: async (text) => {
     const { activeThreadId, threads, language } = get();
     if (!activeThreadId) return;
 
     const thread = threads.find(t => t.id === activeThreadId);
     if (!thread) return;
 
-    // Turn count is calculated based on user message turns
     const userTurnCount = thread.messages.filter(m => m.sender === 'user').length;
 
     const userMessage: Message = {
@@ -223,13 +223,61 @@ export const useJourneyStore = create<JourneyStore>()(
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
     };
 
-    // Pre-inject user message
+    // Optimistically update thread with user message
     const updatedMessages = [...thread.messages, userMessage];
+    set((state) => ({
+      threads: state.threads.map(t => {
+        if (t.id === activeThreadId) {
+          return {
+            ...t,
+            messages: updatedMessages,
+            lastUpdated: 'Just now'
+          };
+        }
+        return t;
+      })
+    }));
 
-    // Evaluate response
     const username = useAuthStore.getState().user?.name;
-    const res = getMockResponse(text, userTurnCount, language, username);
 
+    try {
+      // Hit /api/v1/chat/message API
+      const apiResponse = await sendChatMessage(text, {
+        conversationId: activeThreadId,
+        language,
+        mode: 'text',
+        userId: username
+      });
+
+      if (apiResponse.chat?.message) {
+        const aiMessage: Message = {
+          id: apiResponse.chat.assistantMessageId || ('msg-ai-' + Math.random().toString(36).substring(7)),
+          sender: 'ai',
+          text: apiResponse.chat.message,
+          timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        };
+
+        set((state) => ({
+          threads: state.threads.map(t => {
+            if (t.id === activeThreadId) {
+              return {
+                ...t,
+                title: apiResponse.conversation?.title || t.title,
+                messages: [...t.messages, aiMessage],
+                lastUpdated: 'Just now'
+              };
+            }
+            return t;
+          })
+        }));
+        return;
+      }
+    } catch (err) {
+      console.warn('Backend API /api/v1/chat/message failed or offline, falling back to mock orchestrator:', err);
+    }
+
+    // Fallback to local mock orchestrator if backend call failed or returned empty
+    const res = getMockResponse(text, userTurnCount, language, username);
     const aiMessage: Message = {
       id: 'msg-ai-' + Math.random().toString(36).substring(7),
       sender: 'ai',
@@ -250,7 +298,7 @@ export const useJourneyStore = create<JourneyStore>()(
         if (t.id === activeThreadId) {
           return {
             ...t,
-            messages: [...updatedMessages, aiMessage],
+            messages: [...t.messages, aiMessage],
             journeyMetadata: res.journeyMetadata,
             recommendations: res.recommendations,
             systemAction: res.systemAction,
