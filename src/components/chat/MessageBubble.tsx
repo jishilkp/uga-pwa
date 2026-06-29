@@ -1,6 +1,7 @@
 import React, { useState, useRef } from 'react';
 import type { Message } from '../../store/journeyStore';
-import { Info, Play, Pause, Mic, FileText } from 'lucide-react';
+import { Info, Play, Pause, Mic } from 'lucide-react';
+// import { FileText } from 'lucide-react'; // Hidden attachment icon
 import logo from '../../assets/logo.jpg';
 
 interface MessageBubbleProps {
@@ -64,9 +65,11 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({ message, onShowRea
             )}
             {message.attachment.type === 'file' && (
               <div className="flex items-center space-x-3 bg-white/80 dark:bg-gray-900/80 p-3 rounded-xl border border-gray-200/60 dark:border-gray-700/60 shadow-xs">
+                {/* HIDDEN: Attachment icon - commented out for UI refinement
                 <div className="w-9 h-9 rounded-lg bg-uga-forest/10 dark:bg-emerald-900/30 flex items-center justify-center text-uga-forest dark:text-emerald-400 flex-shrink-0">
                   <FileText size={18} />
                 </div>
+                */}
                 <div className="flex-1 min-w-0">
                   <p className="text-xs font-bold truncate text-gray-800 dark:text-gray-200">{message.attachment.name}</p>
                   {message.attachment.size && (
