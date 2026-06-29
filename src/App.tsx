@@ -10,7 +10,6 @@ import { ProfileSheet } from './components/auth/ProfileSheet';
 import { AuthScreen } from './components/auth/AuthScreen';
 import { useAuthStore } from './store/authStore';
 import { 
-  Paperclip, 
   Mic, 
   ArrowUp, 
   Globe, 
@@ -254,6 +253,7 @@ export const App: React.FC = () => {
   const language = useJourneyStore((state) => state.language);
   const isRecording = useJourneyStore((state) => state.isRecording);
   const recordingDuration = useJourneyStore((state) => state.recordingDuration);
+  const isAiThinking = useJourneyStore((state) => state.isAiThinking);
   
   const sendMessage = useJourneyStore((state) => state.sendMessage);
   const sendAudioMessage = useJourneyStore((state) => state.sendAudioMessage);
@@ -435,9 +435,9 @@ export const App: React.FC = () => {
   };
 
   // Media attachment click and file selection handlers
-  const handleAttachmentClick = () => {
-    fileInputRef.current?.click();
-  };
+  // const handleAttachmentClick = () => {
+  //   fileInputRef.current?.click();
+  // };
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -1339,6 +1339,22 @@ export const App: React.FC = () => {
                   ))}
                 </div>
               ))}
+              {isAiThinking && (
+                <div className="flex items-start space-x-3 my-3 px-1 animate-pulse">
+                  <img 
+                    src={logo} 
+                    alt="UGA Healing Intelligence" 
+                    className="w-8 h-8 rounded-full object-cover border border-uga-sage/40 dark:border-gray-800 dark:brightness-110 flex-shrink-0 mt-0.5 shadow-sm" 
+                  />
+                  <div className="bg-white dark:bg-gray-800 border border-emerald-100 dark:border-gray-700/80 rounded-2xl rounded-tl-none p-3.5 shadow-sm">
+                    <div className="flex items-center space-x-1.5 py-1 px-0.5">
+                      <div className="w-2 h-2 bg-uga-forest/70 dark:bg-emerald-400/70 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
+                      <div className="w-2 h-2 bg-uga-forest/70 dark:bg-emerald-400/70 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
+                      <div className="w-2 h-2 bg-uga-forest/70 dark:bg-emerald-400/70 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           )}
         </div>

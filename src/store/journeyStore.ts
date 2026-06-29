@@ -81,6 +81,7 @@ interface JourneyStore {
   consent: ConsentRecord;
   isRecording: boolean;
   recordingDuration: number;
+  isAiThinking: boolean;
   
   // Actions
   createNewThread: (title?: string, initialMessage?: string) => string;
@@ -109,6 +110,7 @@ export const useJourneyStore = create<JourneyStore>()(
   consent: defaultConsent,
   isRecording: false,
   recordingDuration: 0,
+  isAiThinking: false,
 
   createNewThread: (title, initialMessage) => {
     const newId = 'thread-' + Math.random().toString(36).substring(7);
@@ -138,53 +140,89 @@ export const useJourneyStore = create<JourneyStore>()(
 
     set((state) => ({
       threads: [newThread, ...state.threads],
-      activeThreadId: newId
+      activeThreadId: newId,
+      isAiThinking: !!initialMessage
     }));
 
     if (initialMessage) {
-      // Trigger response logic for this new thread
-      const store = get();
-      const userTurnCount = 0;
-      const username = useAuthStore.getState().user?.name;
-      const res = getMockResponse(initialMessage, userTurnCount, store.language, username);
-      
-      const aiMessage: Message = {
-        id: 'msg-init-2',
-        sender: 'ai',
-        text: res.textResponse,
-        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        extractedStateSnapshot: {
-          journey: res.journeyMetadata.currentJourney,
-          stage: res.journeyMetadata.currentStage,
-          themes: res.journeyMetadata.extractedThemes,
-          needs: res.journeyMetadata.unmetNeeds,
-          risks: res.journeyMetadata.riskIndicators
-        },
-        recommendations: res.recommendations
-      };
+      (async () => {
+        const username = useAuthStore.getState().user?.name;
+        const { language } = get();
+        try {
+          const apiResponse = await sendChatMessage(initialMessage, {
+            conversationId: newId,
+            language,
+            mode: 'text',
+            userId: username
+          });
 
-      set((state) => ({
-        threads: state.threads.map(t => {
-          if (t.id === newId) {
-            // Try to auto-derive a better title from the input if it's a known journey
-            let newTitle = t.title;
-            if (res.journeyMetadata.currentJourney.includes('Grief')) newTitle = 'Grief Journey';
-            else if (res.journeyMetadata.currentJourney.includes('Burnout')) newTitle = 'Work Overload';
-            else if (res.journeyMetadata.currentJourney.includes('Caregiver')) newTitle = 'Caregiver Support';
-
-            return {
-              ...t,
-              title: newTitle,
-              messages: [...t.messages, aiMessage],
-              journeyMetadata: res.journeyMetadata,
-              recommendations: res.recommendations,
-              systemAction: res.systemAction,
-              activeLens: res.activeLens
+          if (apiResponse.chat?.message) {
+            const aiMessage: Message = {
+              id: apiResponse.chat.assistantMessageId || ('msg-ai-' + Math.random().toString(36).substring(7)),
+              sender: 'ai',
+              text: apiResponse.chat.message,
+              timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
             };
+
+            set((state) => ({
+              isAiThinking: false,
+              threads: state.threads.map(t => {
+                if (t.id === newId) {
+                  return {
+                    ...t,
+                    title: apiResponse.conversation?.title || t.title,
+                    messages: [...t.messages, aiMessage],
+                    lastUpdated: 'Just now'
+                  };
+                }
+                return t;
+              })
+            }));
+            return;
           }
-          return t;
-        })
-      }));
+        } catch (err) {
+          console.warn('Backend API /api/v1/chat/message failed or offline, falling back to mock orchestrator:', err);
+        }
+
+        const res = getMockResponse(initialMessage, 0, language, username);
+        const aiMessage: Message = {
+          id: 'msg-init-2',
+          sender: 'ai',
+          text: res.textResponse,
+          timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+          extractedStateSnapshot: {
+            journey: res.journeyMetadata.currentJourney,
+            stage: res.journeyMetadata.currentStage,
+            themes: res.journeyMetadata.extractedThemes,
+            needs: res.journeyMetadata.unmetNeeds,
+            risks: res.journeyMetadata.riskIndicators
+          },
+          recommendations: res.recommendations
+        };
+
+        set((state) => ({
+          isAiThinking: false,
+          threads: state.threads.map(t => {
+            if (t.id === newId) {
+              let newTitle = t.title;
+              if (res.journeyMetadata.currentJourney.includes('Grief')) newTitle = 'Grief Journey';
+              else if (res.journeyMetadata.currentJourney.includes('Burnout')) newTitle = 'Work Overload';
+              else if (res.journeyMetadata.currentJourney.includes('Caregiver')) newTitle = 'Caregiver Support';
+
+              return {
+                ...t,
+                title: newTitle,
+                messages: [...t.messages, aiMessage],
+                journeyMetadata: res.journeyMetadata,
+                recommendations: res.recommendations,
+                systemAction: res.systemAction,
+                activeLens: res.activeLens
+              };
+            }
+            return t;
+          })
+        }));
+      })();
     }
 
     return newId;
@@ -223,9 +261,10 @@ export const useJourneyStore = create<JourneyStore>()(
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
     };
 
-    // Optimistically update thread with user message
+    // Optimistically update thread with user message and set isAiThinking: true
     const updatedMessages = [...thread.messages, userMessage];
     set((state) => ({
+      isAiThinking: true,
       threads: state.threads.map(t => {
         if (t.id === activeThreadId) {
           return {
@@ -258,6 +297,7 @@ export const useJourneyStore = create<JourneyStore>()(
         };
 
         set((state) => ({
+          isAiThinking: false,
           threads: state.threads.map(t => {
             if (t.id === activeThreadId) {
               return {
@@ -294,6 +334,7 @@ export const useJourneyStore = create<JourneyStore>()(
     };
 
     set((state) => ({
+      isAiThinking: false,
       threads: state.threads.map(t => {
         if (t.id === activeThreadId) {
           return {
