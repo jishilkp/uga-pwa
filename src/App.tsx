@@ -375,6 +375,13 @@ export const App: React.FC = () => {
     };
   }, [isMusicPlaying]);
 
+  // Load user's conversations when they log in
+  useEffect(() => {
+    if (user?.id && isAuthenticated) {
+      useJourneyStore.getState().loadConversations(user.id);
+    }
+  }, [user?.id, isAuthenticated]);
+
   const handleSend = () => {
     if (inputText.trim() === '') return;
     if (!activeThreadId) {

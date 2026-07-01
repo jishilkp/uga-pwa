@@ -50,6 +50,28 @@ export interface LightChatResponse {
   };
 }
 
+export interface ConversationSummary {
+  id: string;
+  title: string;
+  lastUpdatedAt: string;
+}
+
+export interface ConversationMessage {
+  role: 'user' | 'assistant';
+  content: string;
+}
+
+export interface ConversationDetail {
+  id: string;
+  title: string;
+  lastUpdatedAt: string;
+  messages?: ConversationMessage[];
+}
+
+export interface ConversationsListResponse {
+  conversations: ConversationSummary[];
+}
+
 const DEFAULT_BASE_URL = 'http://127.0.0.1:8000';
 
 export function getApiBaseUrl(): string {
@@ -116,6 +138,54 @@ export async function sendChatMessage(
   if (!response.ok) {
     const errorData = await response.json().catch(() => ({}));
     throw new Error(errorData?.error?.message || `API request failed with status ${response.status}`);
+  }
+
+  return await response.json();
+}
+
+export async function getConversations(userId: string): Promise<ConversationSummary[]> {
+  const baseUrl = getApiBaseUrl();
+  const endpoint = `${baseUrl.replace(/\/+$/, '')}/api/v1/chat/conversations`;
+
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+    'X-User-Id': userId,
+  };
+
+  const response = await fetch(endpoint, {
+    method: 'GET',
+    headers,
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData?.error?.message || `Failed to fetch conversations: ${response.status}`);
+  }
+
+  const data = await response.json();
+  return data.conversations || [];
+}
+
+export async function getConversationById(
+  conversationId: string,
+  userId: string
+): Promise<ConversationDetail> {
+  const baseUrl = getApiBaseUrl();
+  const endpoint = `${baseUrl.replace(/\/+$/, '')}/api/v1/chat/conversations/${conversationId}`;
+
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+    'X-User-Id': userId,
+  };
+
+  const response = await fetch(endpoint, {
+    method: 'GET',
+    headers,
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData?.error?.message || `Failed to fetch conversation: ${response.status}`);
   }
 
   return await response.json();
