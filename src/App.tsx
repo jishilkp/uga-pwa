@@ -267,6 +267,9 @@ export const App: React.FC = () => {
 
   const activeThread = threads.find(t => t.id === activeThreadId) || null;
   const messages = activeThread?.messages || [];
+  const lastMessage = messages[messages.length - 1];
+  const hasSuggestions = lastMessage?.sender === 'ai' && lastMessage?.suggestions && lastMessage.suggestions.length > 0;
+
 
   const chatContainerRef = useRef<HTMLDivElement>(null);
   const intervalRef = useRef<number | null>(null);
@@ -1362,6 +1365,20 @@ export const App: React.FC = () => {
         {/* Clean Docked Chat Input bar at the bottom when in conversation mode */}
         {messages.length > 0 && (
           <div className="flex-shrink-0 bg-[#FDFBF7] dark:bg-gray-900 px-4 pb-3.5 pt-1.5 z-40">
+            {hasSuggestions && lastMessage.suggestions && (
+              <div className="flex flex-wrap items-center gap-2 mb-3.5 px-0.5">
+                {lastMessage.suggestions.map((sug, idx) => (
+                  <button
+                    key={idx}
+                    onClick={() => handleSuggestionClick(sug.text)}
+                    className="bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-800/60 hover:bg-uga-sageLight/10 dark:hover:bg-gray-700/50 rounded-full px-4 py-2.5 text-[12.5px] font-bold text-uga-forestLight dark:text-emerald-400 shadow-sm transition active:scale-95 cursor-pointer leading-none truncate max-w-full"
+                    title={sug.text}
+                  >
+                    {sug.text}
+                  </button>
+                ))}
+              </div>
+            )}
             <div className="glass-panel rounded-2xl p-3 flex items-center justify-between border border-uga-sageDark dark:border-gray-800 shadow-lg">
               
               {/* Attachment icon hidden */}

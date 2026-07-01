@@ -28,6 +28,25 @@ export interface Message {
     risks: string[];
   };
   recommendations?: Recommendation[];
+  suggestions?: Array<{
+    text: string;
+    type?: string;
+  }>;
+  mode?: 'chat' | 'consent' | 'artifact' | 'test_consent';
+  consent?: {
+    consentId: string;
+    consentFor?: string[];
+    options?: Array<{ label: string; value: string }>;
+    supportOptions?: Array<{
+      id: string;
+      label: string;
+      description: string;
+      type: string;
+      requiresConsent: boolean;
+      status: string;
+    }>;
+  };
+  selectedConsentDecision?: string;
 }
 
 export interface Thread {
@@ -88,6 +107,7 @@ interface JourneyStore {
   switchThread: (id: string | null) => void;
   deleteThread: (id: string) => void;
   sendMessage: (text: string) => void;
+  sendConsentResponse: (consentId: string, decision: string, label: string, selectedSupportOptionId?: string) => void;
   sendAudioMessage: (audioUrl: string, duration: number, text?: string) => void;
   sendMediaMessage: (attachment: Attachment, text?: string) => void;
   setLanguage: (lang: 'en' | 'ta' | 'hi') => void;
@@ -152,16 +172,18 @@ export const useJourneyStore = create<JourneyStore>()(
           const apiResponse = await sendChatMessage(initialMessage, {
             conversationId: newId,
             language,
-            mode: 'text',
+            mode: initialMessage === 'test consent screen' ? 'test_consent' : 'text',
             userId: username
           });
-
           if (apiResponse.chat?.message) {
             const aiMessage: Message = {
               id: apiResponse.chat.assistantMessageId || ('msg-ai-' + Math.random().toString(36).substring(7)),
               sender: 'ai',
               text: apiResponse.chat.message,
               timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+              suggestions: apiResponse.chat.suggestions,
+              mode: apiResponse.chat.mode,
+              consent: apiResponse.chat.consent,
             };
 
             set((state) => ({
@@ -284,16 +306,18 @@ export const useJourneyStore = create<JourneyStore>()(
       const apiResponse = await sendChatMessage(text, {
         conversationId: activeThreadId,
         language,
-        mode: 'text',
+        mode: text === 'test consent screen' ? 'test_consent' : 'text',
         userId: username
       });
-
       if (apiResponse.chat?.message) {
         const aiMessage: Message = {
           id: apiResponse.chat.assistantMessageId || ('msg-ai-' + Math.random().toString(36).substring(7)),
           sender: 'ai',
           text: apiResponse.chat.message,
           timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+          suggestions: apiResponse.chat.suggestions,
+          mode: apiResponse.chat.mode,
+          consent: apiResponse.chat.consent,
         };
 
         set((state) => ({
@@ -349,6 +373,121 @@ export const useJourneyStore = create<JourneyStore>()(
         }
         return t;
       })
+    }));
+  },
+
+  sendConsentResponse: async (consentId, decision, label, selectedSupportOptionId) => {
+    const { activeThreadId, threads, language } = get();
+    if (!activeThreadId) return;
+
+    const thread = threads.find(t => t.id === activeThreadId);
+    if (!thread) return;
+
+    // If decision is 'yes' and label is 'Yes', this is the initial consent click:
+    // We only toggle selectedConsentDecision to 'yes' locally in the UI to show cards.
+    if (decision === 'yes' && label.toLowerCase() === 'yes') {
+      set((state) => ({
+        threads: state.threads.map(t => {
+          if (t.id === activeThreadId) {
+            const msgsCopy = [...t.messages];
+            for (let i = msgsCopy.length - 1; i >= 0; i--) {
+              if (msgsCopy[i].sender === 'ai' && msgsCopy[i].mode === 'consent') {
+                msgsCopy[i] = {
+                  ...msgsCopy[i],
+                  selectedConsentDecision: 'yes'
+                };
+                break;
+              }
+            }
+            return {
+              ...t,
+              messages: msgsCopy
+            };
+          }
+          return t;
+        })
+      }));
+      return;
+    }
+
+    const userMessage: Message = {
+      id: 'msg-user-' + Math.random().toString(36).substring(7),
+      sender: 'user',
+      text: label,
+      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+    };
+    set((state) => ({
+      isAiThinking: true,
+      threads: state.threads.map(t => {
+        if (t.id === activeThreadId) {
+          const msgsCopy = [...t.messages];
+          for (let i = msgsCopy.length - 1; i >= 0; i--) {
+            if (msgsCopy[i].sender === 'ai' && msgsCopy[i].mode === 'consent') {
+              msgsCopy[i] = {
+                ...msgsCopy[i],
+                selectedConsentDecision: decision
+              };
+              break;
+            }
+          }
+          return {
+            ...t,
+            messages: [...msgsCopy, userMessage],
+            lastUpdated: 'Just now'
+          };
+        }
+        return t;
+      })
+    }));
+
+    const username = useAuthStore.getState().user?.name;
+
+    try {
+      const apiResponse = await sendChatMessage(selectedSupportOptionId ? 'Yes' : label, {
+        conversationId: activeThreadId,
+        language,
+        mode: 'consent_response',
+        userId: username,
+        consentResponse: {
+          consentId,
+          decision,
+          selectedSupportOptionIds: selectedSupportOptionId ? [selectedSupportOptionId] : undefined
+        }
+      });
+
+      if (apiResponse.chat?.message) {
+        const aiMessage: Message = {
+          id: apiResponse.chat.assistantMessageId || ('msg-ai-' + Math.random().toString(36).substring(7)),
+          sender: 'ai',
+          text: apiResponse.chat.message,
+          timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+          suggestions: apiResponse.chat.suggestions,
+          mode: apiResponse.chat.mode,
+          consent: apiResponse.chat.consent,
+        };
+
+        set((state) => ({
+          isAiThinking: false,
+          threads: state.threads.map(t => {
+            if (t.id === activeThreadId) {
+              return {
+                ...t,
+                title: apiResponse.conversation?.title || t.title,
+                messages: [...t.messages, aiMessage],
+                lastUpdated: 'Just now'
+              };
+            }
+            return t;
+          })
+        }));
+        return;
+      }
+    } catch (err) {
+      console.warn('Backend API /api/v1/chat/message failed or offline, falling back to mock response:', err);
+    }
+
+    set(() => ({
+      isAiThinking: false
     }));
   },
 

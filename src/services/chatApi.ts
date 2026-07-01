@@ -5,10 +5,11 @@ export interface LightChatPayload {
     language: string;
     message: string;
     clientTimestamp?: string;
-    mode: 'text' | 'suggested_thought' | 'consent_response';
+    mode: 'text' | 'suggested_thought' | 'consent_response' | 'test_consent';
     consentResponse?: {
       consentId: string;
       decision: string;
+      selectedSupportOptionIds?: string[];
     };
   };
 }
@@ -28,6 +29,19 @@ export interface LightChatResponse {
       text: string;
       type?: string;
     }>;
+    consent?: {
+      consentId: string;
+      consentFor?: string[];
+      options?: Array<{ label: string; value: string }>;
+      supportOptions?: Array<{
+        id: string;
+        label: string;
+        description: string;
+        type: string;
+        requiresConsent: boolean;
+        status: string;
+      }>;
+    };
   };
   error?: {
     code: string;
@@ -50,8 +64,13 @@ export async function sendChatMessage(
   options?: {
     conversationId?: string | null;
     language?: string;
-    mode?: 'text' | 'suggested_thought' | 'consent_response';
+    mode?: 'text' | 'suggested_thought' | 'consent_response' | 'test_consent';
     userId?: string;
+    consentResponse?: {
+      consentId: string;
+      decision: string;
+      selectedSupportOptionIds?: string[];
+    };
   }
 ): Promise<LightChatResponse> {
   const baseUrl = getApiBaseUrl();
@@ -77,6 +96,7 @@ export async function sendChatMessage(
       message: messageText,
       clientTimestamp: new Date().toISOString(),
       mode: options?.mode || 'text',
+      consentResponse: options?.consentResponse,
     },
   };
 
