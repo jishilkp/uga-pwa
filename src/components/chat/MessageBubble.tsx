@@ -1,12 +1,25 @@
 import React, { useState, useRef } from 'react';
 import type { Message } from '../../store/journeyStore';
 import { useJourneyStore } from '../../store/journeyStore';
-import { Info, Play, Pause, Mic } from 'lucide-react';
+import { Info, Play, Pause, Mic, Users, UserCheck, Building2, HelpCircle } from 'lucide-react';
 // import { FileText } from 'lucide-react'; // Hidden attachment icon
 import logo from '../../assets/logo.jpg';
 import communityImg from '../../assets/community_support.jpg';
 import practitionerImg from '../../assets/practitioner_support.jpg';
 import institutionImg from '../../assets/institution_support.jpg';
+
+const getTypeIcon = (type: string) => {
+  switch (type?.toLowerCase()) {
+    case 'community':
+      return <Users size={12} className="text-uga-forestLight dark:text-emerald-400" />;
+    case 'practitioner':
+      return <UserCheck size={12} className="text-uga-forestLight dark:text-emerald-400" />;
+    case 'institution':
+      return <Building2 size={12} className="text-uga-forestLight dark:text-emerald-400" />;
+    default:
+      return <HelpCircle size={12} className="text-uga-forestLight dark:text-emerald-400" />;
+  }
+};
 
 interface MessageBubbleProps {
   message: Message;
@@ -189,37 +202,41 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({ message, onShowRea
                       const imageSrc = 
                         opt.type === 'community' ? communityImg : 
                         opt.type === 'institution' ? institutionImg : 
-                        practitionerImg;
+                        opt.type === 'practitioner' ? practitionerImg : 
+                        communityImg;
                       return (
                         <div 
                           key={opt.id}
                           className="bg-gray-50 dark:bg-gray-850 rounded-2xl overflow-hidden border border-gray-100 dark:border-gray-800/60 shadow-xs flex flex-col"
                         >
-                          <div className="h-28 w-full overflow-hidden bg-gray-100 dark:bg-gray-900 relative">
+                          <div className="h-20 w-full overflow-hidden bg-gray-100 dark:bg-gray-900 relative">
                             <img 
                               src={imageSrc} 
                               alt={opt.label}
                               className="w-full h-full object-cover"
                             />
-                            <div className="absolute top-2.5 right-2.5 bg-emerald-50 dark:bg-emerald-950/80 text-emerald-700 dark:text-emerald-400 text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md border border-emerald-100/50 dark:border-emerald-900/40 shadow-xs">
+                            <div className="absolute top-2 right-2 bg-emerald-50 dark:bg-emerald-950/80 text-emerald-700 dark:text-emerald-400 text-[9px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded border border-emerald-100/50 dark:border-emerald-900/40 shadow-xs">
                               {opt.status}
                             </div>
                           </div>
-                          <div className="p-3.5 flex-1 flex flex-col justify-between">
+                          <div className="p-2.5 flex-1 flex flex-col justify-between">
                             <div>
-                              <span className="text-[10px] font-black uppercase tracking-wider text-uga-forestLight dark:text-emerald-400 block mb-1">
-                                {opt.type}
-                              </span>
-                              <h4 className="text-[13.5px] font-extrabold text-gray-850 dark:text-gray-100 leading-snug mb-1.5">
+                              <div className="flex items-center gap-1.5 mb-1">
+                                {getTypeIcon(opt.type)}
+                                <span className="text-[9px] font-black uppercase tracking-wider text-uga-forestLight dark:text-emerald-400 leading-none">
+                                  {opt.type}
+                                </span>
+                              </div>
+                              <h4 className="text-xs font-bold text-gray-850 dark:text-gray-100 leading-tight mb-1">
                                 {opt.label}
                               </h4>
-                              <p className="text-[11.5px] leading-relaxed text-gray-500 dark:text-gray-400 mb-3.5">
+                              <p className="text-[10px] leading-relaxed text-gray-500 dark:text-gray-400 mb-2.5">
                                 {opt.description}
                               </p>
                             </div>
                             <button 
                               onClick={() => sendConsentResponse(message.consent!.consentId, 'yes', opt.label, opt.id)}
-                              className="w-full py-2 rounded-xl bg-uga-forest dark:bg-emerald-800 text-white text-xs font-bold shadow-xs hover:opacity-90 transition-opacity active:scale-[0.98]"
+                              className="w-full py-1.5 rounded-lg bg-uga-forest dark:bg-emerald-800 text-white text-[11px] font-bold shadow-xs hover:opacity-90 transition-opacity active:scale-[0.98]"
                             >
                               Select
                             </button>

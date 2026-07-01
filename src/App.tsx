@@ -175,6 +175,15 @@ export const App: React.FC = () => {
   const [isProfileSheetOpen, setIsProfileSheetOpen] = useState(false);
   const [isGuestLimitModalOpen, setIsGuestLimitModalOpen] = useState(false);
 
+  // Clear chat input on signout but retain it on signin
+  const prevUserRef = useRef(user);
+  useEffect(() => {
+    if (prevUserRef.current && !user) {
+      setInputText('');
+    }
+    prevUserRef.current = user;
+  }, [user]);
+
   const webScrollContainerRef = useRef<HTMLDivElement>(null);
   const overviewRef = useRef<HTMLDivElement>(null);
   const problemRef = useRef<HTMLDivElement>(null);
@@ -248,7 +257,9 @@ export const App: React.FC = () => {
     }
   };
 
-  const threads = useJourneyStore((state) => state.threads);
+  const currentUserId = user?.id || 'guest';
+  const allThreads = useJourneyStore((state) => state.threads);
+  const threads = allThreads.filter(t => t.userId === currentUserId || (!t.userId && currentUserId === 'guest'));
   const activeThreadId = useJourneyStore((state) => state.activeThreadId);
   const language = useJourneyStore((state) => state.language);
   const isRecording = useJourneyStore((state) => state.isRecording);

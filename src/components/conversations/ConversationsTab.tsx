@@ -1,5 +1,6 @@
 import React from 'react';
 import { useJourneyStore } from '../../store/journeyStore';
+import { useAuthStore } from '../../store/authStore';
 import { MessageSquare, Calendar, ChevronRight, Plus, Trash2 } from 'lucide-react';
 
 interface ConversationsTabProps {
@@ -7,7 +8,10 @@ interface ConversationsTabProps {
 }
 
 export const ConversationsTab: React.FC<ConversationsTabProps> = ({ setActiveTab }) => {
-  const threads = useJourneyStore((state) => state.threads);
+  const currentUser = useAuthStore((s) => s.user);
+  const currentUserId = currentUser?.id || 'guest';
+  const allThreads = useJourneyStore((state) => state.threads);
+  const threads = allThreads.filter(t => t.userId === currentUserId || (!t.userId && currentUserId === 'guest'));
   const activeThreadId = useJourneyStore((state) => state.activeThreadId);
   const switchThread = useJourneyStore((state) => state.switchThread);
   const createNewThread = useJourneyStore((state) => state.createNewThread);

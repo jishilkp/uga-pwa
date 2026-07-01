@@ -58,6 +58,7 @@ export interface Thread {
   systemAction: 'SAFETY_BREAKOUT_CRISIS' | null;
   activeLens: string;
   lastUpdated: string;
+  userId?: string;
   wisdomQuote?: {
     author: string;
     text: string;
@@ -131,12 +132,13 @@ export const useJourneyStore = create<JourneyStore>()(
   isRecording: false,
   recordingDuration: 0,
   isAiThinking: false,
-
   createNewThread: (title, initialMessage) => {
     const newId = 'thread-' + Math.random().toString(36).substring(7);
+    const userId = useAuthStore.getState().user?.id || 'guest';
     const newThread: Thread = {
       id: newId,
       title: title || 'New Healing Chapter',
+      userId,
       messages: initialMessage ? [
         {
           id: 'msg-init-1',
@@ -666,7 +668,12 @@ export const useJourneyStore = create<JourneyStore>()(
 
   getActiveThread: () => {
     const { threads, activeThreadId } = get();
-    return threads.find(t => t.id === activeThreadId) || null;
+    const currentUserId = useAuthStore.getState().user?.id || 'guest';
+    const active = threads.find(t => t.id === activeThreadId);
+    if (active && (active.userId === currentUserId || (!active.userId && currentUserId === 'guest'))) {
+      return active;
+    }
+    return null;
   }
     }),
     {
