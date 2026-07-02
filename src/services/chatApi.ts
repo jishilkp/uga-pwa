@@ -58,7 +58,8 @@ export interface ConversationSummary {
 
 export interface ConversationMessage {
   role: 'user' | 'assistant';
-  content: string;
+  content?: string;
+  message?: string;
 }
 
 export interface ConversationDetail {
@@ -75,8 +76,16 @@ export interface ConversationsListResponse {
 const DEFAULT_BASE_URL = 'http://127.0.0.1:8000';
 
 export function getApiBaseUrl(): string {
-  if (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_API_BASE_URL) {
-    return import.meta.env.VITE_API_BASE_URL;
+  if (typeof import.meta !== 'undefined' && import.meta.env) {
+    if (import.meta.env.VITE_API_BASE_URL) {
+      return import.meta.env.VITE_API_BASE_URL;
+    }
+    if (import.meta.env.VITE_API_PRODUCTION_URL && import.meta.env.MODE === 'production') {
+      return import.meta.env.VITE_API_PRODUCTION_URL;
+    }
+    if (import.meta.env.VITE_API_DEVELOPMENT_URL) {
+      return import.meta.env.VITE_API_DEVELOPMENT_URL;
+    }
   }
   return DEFAULT_BASE_URL;
 }
@@ -143,6 +152,58 @@ export async function sendChatMessage(
   return await response.json();
 }
 
+export async function sendAudioChatMessage(
+  audioFile: File | Blob,
+  options?: {
+    conversationId?: string | null;
+    language?: string;
+    userId?: string;
+    message?: string;
+  }
+): Promise<LightChatResponse> {
+  const baseUrl = getApiBaseUrl();
+  const endpoint = `${baseUrl.replace(/\/+$/, '')}/api/v1/chat/message/audio`;
+
+  const clientMessageId = typeof crypto !== 'undefined' && crypto.randomUUID
+    ? crypto.randomUUID()
+    : 'msg-' + Math.random().toString(36).substring(2, 15) + Date.now().toString(36);
+
+  const langMap: Record<string, string> = {
+    en: 'English',
+    ta: 'Tamil',
+    hi: 'Hindi',
+  };
+  const rawLang = options?.language || 'en';
+  const normalizedLang = langMap[rawLang] || rawLang;
+
+  const formData = new FormData();
+  formData.append('audio', audioFile, 'recording.mp3');
+  formData.append('conversationId', options?.conversationId || '');
+  formData.append('clientMessageId', clientMessageId);
+  formData.append('language', normalizedLang);
+  formData.append('message', options?.message || '');
+  formData.append('clientTimestamp', new Date().toISOString());
+  formData.append('mode', 'audio');
+
+  const headers: Record<string, string> = {};
+  if (options?.userId) {
+    headers['X-User-Id'] = options.userId;
+  }
+
+  const response = await fetch(endpoint, {
+    method: 'POST',
+    headers,
+    body: formData,
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData?.error?.message || `Audio API request failed with status ${response.status}`);
+  }
+
+  return await response.json();
+}
+
 export async function getConversations(userId: string): Promise<ConversationSummary[]> {
   const baseUrl = getApiBaseUrl();
   const endpoint = `${baseUrl.replace(/\/+$/, '')}/api/v1/chat/conversations`;
@@ -163,7 +224,11 @@ export async function getConversations(userId: string): Promise<ConversationSumm
   }
 
   const data = await response.json();
-  return data.conversations || [];
+  return (data.conversations || []).map((c: ConversationSummary & { createdAt?: string }) => ({
+    id: c.id,
+    title: c.title,
+    lastUpdatedAt: c.lastUpdatedAt,
+  }));
 }
 
 export async function getConversationById(
@@ -188,5 +253,16 @@ export async function getConversationById(
     throw new Error(errorData?.error?.message || `Failed to fetch conversation: ${response.status}`);
   }
 
-  return await response.json();
+  const data = await response.json();
+  const conv = data.conversation || data;
+  const messages = (data.messages || []).map((m: ConversationMessage) => ({
+    role: m.role,
+    content: m.message || m.content || '',
+  }));
+  return {
+    id: conv.id,
+    title: conv.title,
+    lastUpdatedAt: conv.lastUpdatedAt,
+    messages,
+  };
 }
