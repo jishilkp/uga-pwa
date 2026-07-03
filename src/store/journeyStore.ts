@@ -97,6 +97,7 @@ export const defaultConsent: ConsentRecord = {
 interface JourneyStore {
   threads: Thread[];
   activeThreadId: string | null;
+  pendingThreadLocalId: string | null; // local thread-xxx id waiting for backend UUID
   language: 'en' | 'ta' | 'hi';
   consent: ConsentRecord;
   isRecording: boolean;
@@ -133,6 +134,7 @@ export const useJourneyStore = create<JourneyStore>()(
     (set, get) => ({
   threads: [],
   activeThreadId: null,
+  pendingThreadLocalId: null,
   language: 'en',
   consent: defaultConsent,
   isRecording: false,
@@ -171,7 +173,8 @@ export const useJourneyStore = create<JourneyStore>()(
     set((state) => ({
       threads: [newThread, ...state.threads],
       activeThreadId: newId,
-      isAiThinking: !!initialMessage
+      isAiThinking: !!initialMessage,
+      pendingThreadLocalId: initialMessage ? newId : state.pendingThreadLocalId
     }));
 
     if (initialMessage) {
@@ -200,6 +203,7 @@ export const useJourneyStore = create<JourneyStore>()(
             set((state) => ({
               isAiThinking: false,
               activeThreadId: backendId,
+              pendingThreadLocalId: null,
               threads: state.threads.map(t => {
                 if (t.id === newId) {
                   return {
@@ -237,6 +241,7 @@ export const useJourneyStore = create<JourneyStore>()(
 
         set((state) => ({
           isAiThinking: false,
+          pendingThreadLocalId: null,
           threads: state.threads.map(t => {
             if (t.id === newId) {
               let newTitle = t.title;
@@ -281,8 +286,13 @@ export const useJourneyStore = create<JourneyStore>()(
   },
 
   sendMessage: async (text) => {
-    const { activeThreadId, threads, language } = get();
+    // Always read fresh state to avoid stale activeThreadId after ID replacement
+    const activeThreadId = get().activeThreadId;
+    const { threads, language, pendingThreadLocalId } = get();
     if (!activeThreadId) return;
+
+    // If createNewThread is still waiting for backend UUID, don't send — it would create a duplicate conversation
+    if (pendingThreadLocalId && activeThreadId === pendingThreadLocalId) return;
 
     const thread = threads.find(t => t.id === activeThreadId);
     if (!thread) return;
@@ -296,17 +306,11 @@ export const useJourneyStore = create<JourneyStore>()(
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
     };
 
-    // Optimistically update thread with user message and set isAiThinking: true
-    const updatedMessages = [...thread.messages, userMessage];
     set((state) => ({
       isAiThinking: true,
       threads: state.threads.map(t => {
         if (t.id === activeThreadId) {
-          return {
-            ...t,
-            messages: updatedMessages,
-            lastUpdated: 'Just now'
-          };
+          return { ...t, messages: [...t.messages, userMessage], lastUpdated: 'Just now' };
         }
         return t;
       })
@@ -323,13 +327,16 @@ export const useJourneyStore = create<JourneyStore>()(
         mode: text === 'test consent screen' ? 'test_consent' : 'text',
         userId
       });
-      if (apiResponse.conversation?.id && isLocalId) {
-        resolvedThreadId = apiResponse.conversation.id;
+
+      const backendConvId = apiResponse.conversation?.id;
+      if (backendConvId && isLocalId) {
+        resolvedThreadId = backendConvId;
         set((state) => ({
           activeThreadId: resolvedThreadId,
           threads: state.threads.map(t => t.id === activeThreadId ? { ...t, id: resolvedThreadId } : t)
         }));
       }
+
       if (apiResponse.chat?.message) {
         const aiMessage: Message = {
           id: apiResponse.chat.assistantMessageId || ('msg-ai-' + Math.random().toString(36).substring(7)),
@@ -357,6 +364,16 @@ export const useJourneyStore = create<JourneyStore>()(
         return;
       }
     } catch (err) {
+      const errMsg = err instanceof Error ? err.message : '';
+      // Backend UNIQUE constraint means this conversationId is stale/orphaned in our localStorage.
+      // Reset the thread to a local id so the next send creates a fresh conversation.
+      if (!isLocalId && errMsg.includes('UNIQUE constraint')) {
+        const freshLocalId = 'thread-' + Math.random().toString(36).substring(2, 10);
+        set((state) => ({
+          activeThreadId: freshLocalId,
+          threads: state.threads.map(t => t.id === activeThreadId ? { ...t, id: freshLocalId } : t)
+        }));
+      }
       console.warn('Backend API /api/v1/chat/message failed or offline, falling back to mock orchestrator:', err);
     }
 
@@ -786,6 +803,7 @@ export const useJourneyStore = create<JourneyStore>()(
         activeThreadId: state.activeThreadId,
         language: state.language,
         consent: state.consent
+        // pendingThreadLocalId intentionally excluded — transient, never persisted
       })
     }
   )
