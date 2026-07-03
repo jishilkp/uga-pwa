@@ -276,6 +276,15 @@ export const App: React.FC = () => {
   const switchThread = useJourneyStore((state) => state.switchThread);
   const deleteThread = useJourneyStore((state) => state.deleteThread);
 
+  // Reset active thread to null (go to home screen) on successful login
+  const prevAuthRef = useRef(isAuthenticated);
+  useEffect(() => {
+    if (!prevAuthRef.current && isAuthenticated) {
+      switchThread(null);
+    }
+    prevAuthRef.current = isAuthenticated;
+  }, [isAuthenticated, switchThread]);
+
   const activeThread = threads.find(t => t.id === activeThreadId) || null;
   const messages = activeThread?.messages || [];
   const lastMessage = messages[messages.length - 1];
@@ -1365,12 +1374,10 @@ export const App: React.FC = () => {
                     alt="UGA Healing Intelligence" 
                     className="w-8 h-8 rounded-full object-cover border border-uga-sage/40 dark:border-gray-800 dark:brightness-110 flex-shrink-0 mt-0.5 shadow-sm" 
                   />
-                  <div className="bg-white dark:bg-gray-800 border border-emerald-100 dark:border-gray-700/80 rounded-2xl rounded-tl-none p-3.5 shadow-sm">
-                    <div className="flex items-center space-x-1.5 py-1 px-0.5">
-                      <div className="w-2 h-2 bg-uga-forest/70 dark:bg-emerald-400/70 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
-                      <div className="w-2 h-2 bg-uga-forest/70 dark:bg-emerald-400/70 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
-                      <div className="w-2 h-2 bg-uga-forest/70 dark:bg-emerald-400/70 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
-                    </div>
+                  <div className="bg-white dark:bg-gray-800 border border-emerald-100 dark:border-gray-700/80 rounded-2xl rounded-tl-none px-3 py-2 shadow-sm">
+                    <span className="text-[10.5px] font-bold text-gray-500 dark:text-gray-400 leading-none animate-pulse">
+                      {language === 'ta' ? 'யோசிக்கிறது...' : language === 'hi' ? 'सोच रहा है...' : 'Thinking...'}
+                    </span>
                   </div>
                 </div>
               )}
@@ -1387,7 +1394,7 @@ export const App: React.FC = () => {
                   <button
                     key={idx}
                     onClick={() => handleSuggestionClick(sug.text)}
-                    className="bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-800/60 hover:bg-uga-sageLight/10 dark:hover:bg-gray-700/50 rounded-full px-4 py-2.5 text-[12.5px] font-bold text-uga-forestLight dark:text-emerald-400 shadow-sm transition active:scale-95 cursor-pointer leading-none truncate max-w-full"
+                    className="bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-800/60 hover:bg-uga-sageLight/10 dark:hover:bg-gray-700/50 rounded-2xl px-4 py-2 text-[12.5px] font-bold text-uga-forestLight dark:text-emerald-400 shadow-sm transition active:scale-95 cursor-pointer leading-tight line-clamp-2 whitespace-normal text-left max-w-full"
                     title={sug.text}
                   >
                     {sug.text}

@@ -141,7 +141,10 @@ export const useJourneyStore = create<JourneyStore>()(
   isLoadingConversations: false,
   conversationError: null,
   createNewThread: (title, initialMessage) => {
-    const newId = 'thread-' + Math.random().toString(36).substring(2, 10);
+    const uniqueSuffix = (typeof crypto !== 'undefined' && crypto.randomUUID) 
+      ? crypto.randomUUID() 
+      : Math.random().toString(36).substring(2) + Date.now().toString(36);
+    const newId = 'thread-' + uniqueSuffix;
     const userId = useAuthStore.getState().user?.id || 'guest';
     const newThread: Thread = {
       id: newId,
