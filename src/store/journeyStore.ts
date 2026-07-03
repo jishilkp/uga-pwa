@@ -713,13 +713,13 @@ export const useJourneyStore = create<JourneyStore>()(
                 id: conv.id,
                 title: conv.title,
                 userId,
-                messages: [],
-                journeyMetadata: { currentJourney: 'General Inquiry', currentStage: 'Confusion', extractedThemes: [], unmetNeeds: [], riskIndicators: [] },
-                recommendations: [],
-                systemAction: null as const,
+                messages: [] as Message[],
+                journeyMetadata: { currentJourney: 'General Inquiry', currentStage: 'Confusion' as const, extractedThemes: [] as string[], unmetNeeds: [] as string[], riskIndicators: [] as string[] },
+                recommendations: [] as Recommendation[],
+                systemAction: null,
                 activeLens: 'None',
                 lastUpdated: new Date(conv.lastUpdatedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-              };
+              } as Thread;
         });
         // Drop stale local thread-xxx threads for this user that are now synced to backend
         const localOnlyThreads = state.threads.filter(t => t.userId === userId && !backendIds.has(t.id) && t.id.startsWith('thread-'));
