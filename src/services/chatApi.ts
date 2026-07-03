@@ -74,17 +74,18 @@ export interface ConversationsListResponse {
 }
 
 const DEFAULT_BASE_URL = 'http://127.0.0.1:8000';
+const DEFAULT_PRODUCTION_BASE_URL = 'https://uga-healing-orchestrator-development.up.railway.app';
 
 export function getApiBaseUrl(): string {
   if (typeof import.meta !== 'undefined' && import.meta.env) {
-    if (import.meta.env.VITE_API_BASE_URL) {
-      return import.meta.env.VITE_API_BASE_URL;
-    }
-    if (import.meta.env.VITE_API_PRODUCTION_URL && import.meta.env.MODE === 'production') {
-      return import.meta.env.VITE_API_PRODUCTION_URL;
+    if (import.meta.env.MODE === 'production') {
+      return import.meta.env.VITE_API_PRODUCTION_URL || DEFAULT_PRODUCTION_BASE_URL;
     }
     if (import.meta.env.VITE_API_DEVELOPMENT_URL) {
       return import.meta.env.VITE_API_DEVELOPMENT_URL;
+    }
+    if (import.meta.env.VITE_API_BASE_URL) {
+      return import.meta.env.VITE_API_BASE_URL;
     }
   }
   return DEFAULT_BASE_URL;
