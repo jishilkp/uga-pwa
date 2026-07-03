@@ -97,7 +97,6 @@ export const defaultConsent: ConsentRecord = {
 interface JourneyStore {
   threads: Thread[];
   activeThreadId: string | null;
-  pendingThreadLocalId: string | null; // local thread-xxx id waiting for backend UUID
   language: 'en' | 'ta' | 'hi';
   consent: ConsentRecord;
   isRecording: boolean;
@@ -134,7 +133,6 @@ export const useJourneyStore = create<JourneyStore>()(
     (set, get) => ({
   threads: [],
   activeThreadId: null,
-  pendingThreadLocalId: null,
   language: 'en',
   consent: defaultConsent,
   isRecording: false,
@@ -143,7 +141,7 @@ export const useJourneyStore = create<JourneyStore>()(
   isLoadingConversations: false,
   conversationError: null,
   createNewThread: (title, initialMessage) => {
-    const newId = 'thread-' + Math.random().toString(36).substring(2, 10);
+    const newId = crypto.randomUUID ? crypto.randomUUID() : 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => { const r = Math.random() * 16 | 0; return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16); });
     const userId = useAuthStore.getState().user?.id || 'guest';
     const newThread: Thread = {
       id: newId,
@@ -173,8 +171,7 @@ export const useJourneyStore = create<JourneyStore>()(
     set((state) => ({
       threads: [newThread, ...state.threads],
       activeThreadId: newId,
-      isAiThinking: !!initialMessage,
-      pendingThreadLocalId: initialMessage ? newId : state.pendingThreadLocalId
+      isAiThinking: !!initialMessage
     }));
 
     if (initialMessage) {
@@ -183,13 +180,12 @@ export const useJourneyStore = create<JourneyStore>()(
         const { language } = get();
         try {
           const apiResponse = await sendChatMessage(initialMessage, {
-            conversationId: null,
+            conversationId: newId,
             language,
             mode: initialMessage === 'test consent screen' ? 'test_consent' : 'text',
             userId
           });
           if (apiResponse.chat?.message) {
-            const backendId = apiResponse.conversation?.id || newId;
             const aiMessage: Message = {
               id: apiResponse.chat.assistantMessageId || ('msg-ai-' + Math.random().toString(36).substring(7)),
               sender: 'ai',
@@ -199,16 +195,12 @@ export const useJourneyStore = create<JourneyStore>()(
               mode: apiResponse.chat.mode,
               consent: apiResponse.chat.consent,
             };
-
             set((state) => ({
               isAiThinking: false,
-              activeThreadId: backendId,
-              pendingThreadLocalId: null,
               threads: state.threads.map(t => {
                 if (t.id === newId) {
                   return {
                     ...t,
-                    id: backendId,
                     title: apiResponse.conversation?.title || t.title,
                     messages: [...t.messages, aiMessage],
                     lastUpdated: 'Just now'
@@ -241,7 +233,6 @@ export const useJourneyStore = create<JourneyStore>()(
 
         set((state) => ({
           isAiThinking: false,
-          pendingThreadLocalId: null,
           threads: state.threads.map(t => {
             if (t.id === newId) {
               let newTitle = t.title;
@@ -286,13 +277,9 @@ export const useJourneyStore = create<JourneyStore>()(
   },
 
   sendMessage: async (text) => {
-    // Always read fresh state to avoid stale activeThreadId after ID replacement
     const activeThreadId = get().activeThreadId;
-    const { threads, language, pendingThreadLocalId } = get();
+    const { threads, language } = get();
     if (!activeThreadId) return;
-
-    // If createNewThread is still waiting for backend UUID, don't send — it would create a duplicate conversation
-    if (pendingThreadLocalId && activeThreadId === pendingThreadLocalId) return;
 
     const thread = threads.find(t => t.id === activeThreadId);
     if (!thread) return;
@@ -317,25 +304,14 @@ export const useJourneyStore = create<JourneyStore>()(
     }));
 
     const userId = useAuthStore.getState().user?.id;
-    const isLocalId = activeThreadId.startsWith('thread-');
-    let resolvedThreadId = activeThreadId;
 
     try {
       const apiResponse = await sendChatMessage(text, {
-        conversationId: isLocalId ? null : activeThreadId,
+        conversationId: activeThreadId,
         language,
         mode: text === 'test consent screen' ? 'test_consent' : 'text',
         userId
       });
-
-      const backendConvId = apiResponse.conversation?.id;
-      if (backendConvId && isLocalId) {
-        resolvedThreadId = backendConvId;
-        set((state) => ({
-          activeThreadId: resolvedThreadId,
-          threads: state.threads.map(t => t.id === activeThreadId ? { ...t, id: resolvedThreadId } : t)
-        }));
-      }
 
       if (apiResponse.chat?.message) {
         const aiMessage: Message = {
@@ -350,7 +326,7 @@ export const useJourneyStore = create<JourneyStore>()(
         set((state) => ({
           isAiThinking: false,
           threads: state.threads.map(t => {
-            if (t.id === resolvedThreadId) {
+            if (t.id === activeThreadId) {
               return {
                 ...t,
                 title: apiResponse.conversation?.title || t.title,
@@ -364,16 +340,6 @@ export const useJourneyStore = create<JourneyStore>()(
         return;
       }
     } catch (err) {
-      const errMsg = err instanceof Error ? err.message : '';
-      // Backend UNIQUE constraint means this conversationId is stale/orphaned in our localStorage.
-      // Reset the thread to a local id so the next send creates a fresh conversation.
-      if (!isLocalId && errMsg.includes('UNIQUE constraint')) {
-        const freshLocalId = 'thread-' + Math.random().toString(36).substring(2, 10);
-        set((state) => ({
-          activeThreadId: freshLocalId,
-          threads: state.threads.map(t => t.id === activeThreadId ? { ...t, id: freshLocalId } : t)
-        }));
-      }
       console.warn('Backend API /api/v1/chat/message failed or offline, falling back to mock orchestrator:', err);
     }
 
@@ -803,7 +769,6 @@ export const useJourneyStore = create<JourneyStore>()(
         activeThreadId: state.activeThreadId,
         language: state.language,
         consent: state.consent
-        // pendingThreadLocalId intentionally excluded — transient, never persisted
       })
     }
   )
