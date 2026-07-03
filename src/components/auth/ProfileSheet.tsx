@@ -50,6 +50,11 @@ export const ProfileSheet: React.FC<ProfileSheetProps> = ({ onClose, onSignUp })
   const { user, isGuest, logout } = useAuthStore();
   const threads = useJourneyStore((s) => s.threads);
   const language = useJourneyStore((s) => s.language);
+  const loadConversations = useJourneyStore((s) => s.loadConversations);
+
+  React.useEffect(() => {
+    if (user?.id) loadConversations(user.id);
+  }, [user?.id]);
   const text = localized[language] || localized.en;
 
   const handleSignOut = () => {
@@ -131,7 +136,9 @@ export const ProfileSheet: React.FC<ProfileSheetProps> = ({ onClose, onSignUp })
         {/* Stats row */}
         <div className="px-6 py-4 flex space-x-3">
           <div className="flex-1 text-center bg-gray-50 dark:bg-gray-800/60 rounded-xl py-3">
-            <p className="text-gray-900 dark:text-white text-xl font-black">{threads.length}</p>
+            <p className="text-gray-900 dark:text-white text-xl font-black">
+              {threads.filter(t => t.userId === (user?.id ?? 'guest')).length}
+            </p>
             <p className="text-gray-400 dark:text-gray-500 text-[10px] font-bold uppercase tracking-wider">{text.conversations}</p>
           </div>
         </div>
