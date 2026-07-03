@@ -313,11 +313,10 @@ export const useJourneyStore = create<JourneyStore>()(
     }));
 
     const userId = useAuthStore.getState().user?.id;
-
     const isLocalId = activeThreadId.startsWith('thread-');
+    let resolvedThreadId = activeThreadId;
 
     try {
-      // Hit /api/v1/chat/message API
       const apiResponse = await sendChatMessage(text, {
         conversationId: isLocalId ? null : activeThreadId,
         language,
@@ -325,10 +324,10 @@ export const useJourneyStore = create<JourneyStore>()(
         userId
       });
       if (apiResponse.conversation?.id && isLocalId) {
-        const backendId = apiResponse.conversation.id;
+        resolvedThreadId = apiResponse.conversation.id;
         set((state) => ({
-          activeThreadId: backendId,
-          threads: state.threads.map(t => t.id === activeThreadId ? { ...t, id: backendId } : t)
+          activeThreadId: resolvedThreadId,
+          threads: state.threads.map(t => t.id === activeThreadId ? { ...t, id: resolvedThreadId } : t)
         }));
       }
       if (apiResponse.chat?.message) {
@@ -341,11 +340,10 @@ export const useJourneyStore = create<JourneyStore>()(
           mode: apiResponse.chat.mode,
           consent: apiResponse.chat.consent,
         };
-
         set((state) => ({
           isAiThinking: false,
           threads: state.threads.map(t => {
-            if (t.id === activeThreadId) {
+            if (t.id === resolvedThreadId) {
               return {
                 ...t,
                 title: apiResponse.conversation?.title || t.title,
