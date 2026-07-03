@@ -102,6 +102,8 @@ interface JourneyStore {
   isRecording: boolean;
   recordingDuration: number;
   isAiThinking: boolean;
+  isLoadingConversations: boolean;
+  conversationError: string | null;
   
   // Actions
   createNewThread: (title?: string, initialMessage?: string) => string;
@@ -116,6 +118,10 @@ interface JourneyStore {
   setRecording: (recording: boolean) => void;
   tickRecordingDuration: () => void;
   resetThreadToCleanState: () => void;
+  
+  loadConversations: (userId: string) => Promise<void>;
+  loadConversationById: (conversationId: string, userId: string) => Promise<void>;
+  clearConversationError: () => void;
   
   // Getters
   getActiveThread: () => Thread | null;
@@ -132,8 +138,10 @@ export const useJourneyStore = create<JourneyStore>()(
   isRecording: false,
   recordingDuration: 0,
   isAiThinking: false,
+  isLoadingConversations: false,
+  conversationError: null,
   createNewThread: (title, initialMessage) => {
-    const newId = 'thread-' + Math.random().toString(36).substring(7);
+    const newId = 'thread-' + Math.random().toString(36).substring(2, 10);
     const userId = useAuthStore.getState().user?.id || 'guest';
     const newThread: Thread = {
       id: newId,
@@ -168,16 +176,17 @@ export const useJourneyStore = create<JourneyStore>()(
 
     if (initialMessage) {
       (async () => {
-        const username = useAuthStore.getState().user?.name;
+        const userId = useAuthStore.getState().user?.id;
         const { language } = get();
         try {
           const apiResponse = await sendChatMessage(initialMessage, {
-            conversationId: newId,
+            conversationId: null,
             language,
             mode: initialMessage === 'test consent screen' ? 'test_consent' : 'text',
-            userId: username
+            userId
           });
           if (apiResponse.chat?.message) {
+            const backendId = apiResponse.conversation?.id || newId;
             const aiMessage: Message = {
               id: apiResponse.chat.assistantMessageId || ('msg-ai-' + Math.random().toString(36).substring(7)),
               sender: 'ai',
@@ -190,10 +199,12 @@ export const useJourneyStore = create<JourneyStore>()(
 
             set((state) => ({
               isAiThinking: false,
+              activeThreadId: backendId,
               threads: state.threads.map(t => {
                 if (t.id === newId) {
                   return {
                     ...t,
+                    id: backendId,
                     title: apiResponse.conversation?.title || t.title,
                     messages: [...t.messages, aiMessage],
                     lastUpdated: 'Just now'
@@ -208,7 +219,7 @@ export const useJourneyStore = create<JourneyStore>()(
           console.warn('Backend API /api/v1/chat/message failed or offline, falling back to mock orchestrator:', err);
         }
 
-        const res = getMockResponse(initialMessage, 0, language, username);
+        const res = getMockResponse(initialMessage, 0, language, userId);
         const aiMessage: Message = {
           id: 'msg-init-2',
           sender: 'ai',
@@ -301,16 +312,24 @@ export const useJourneyStore = create<JourneyStore>()(
       })
     }));
 
-    const username = useAuthStore.getState().user?.name;
+    const userId = useAuthStore.getState().user?.id;
+    const isLocalId = activeThreadId.startsWith('thread-');
+    let resolvedThreadId = activeThreadId;
 
     try {
-      // Hit /api/v1/chat/message API
       const apiResponse = await sendChatMessage(text, {
-        conversationId: activeThreadId,
+        conversationId: isLocalId ? null : activeThreadId,
         language,
         mode: text === 'test consent screen' ? 'test_consent' : 'text',
-        userId: username
+        userId
       });
+      if (apiResponse.conversation?.id && isLocalId) {
+        resolvedThreadId = apiResponse.conversation.id;
+        set((state) => ({
+          activeThreadId: resolvedThreadId,
+          threads: state.threads.map(t => t.id === activeThreadId ? { ...t, id: resolvedThreadId } : t)
+        }));
+      }
       if (apiResponse.chat?.message) {
         const aiMessage: Message = {
           id: apiResponse.chat.assistantMessageId || ('msg-ai-' + Math.random().toString(36).substring(7)),
@@ -321,11 +340,10 @@ export const useJourneyStore = create<JourneyStore>()(
           mode: apiResponse.chat.mode,
           consent: apiResponse.chat.consent,
         };
-
         set((state) => ({
           isAiThinking: false,
           threads: state.threads.map(t => {
-            if (t.id === activeThreadId) {
+            if (t.id === resolvedThreadId) {
               return {
                 ...t,
                 title: apiResponse.conversation?.title || t.title,
@@ -343,7 +361,7 @@ export const useJourneyStore = create<JourneyStore>()(
     }
 
     // Fallback to local mock orchestrator if backend call failed or returned empty
-    const res = getMockResponse(text, userTurnCount, language, username);
+    const res = getMockResponse(text, userTurnCount, language, userId);
     const aiMessage: Message = {
       id: 'msg-ai-' + Math.random().toString(36).substring(7),
       sender: 'ai',
@@ -442,14 +460,14 @@ export const useJourneyStore = create<JourneyStore>()(
       })
     }));
 
-    const username = useAuthStore.getState().user?.name;
+    const userId = useAuthStore.getState().user?.id;
 
     try {
       const apiResponse = await sendChatMessage(selectedSupportOptionId ? 'Yes' : label, {
         conversationId: activeThreadId,
         language,
         mode: 'consent_response',
-        userId: username,
+        userId,
         consentResponse: {
           consentId,
           decision,
@@ -674,7 +692,92 @@ export const useJourneyStore = create<JourneyStore>()(
       return active;
     }
     return null;
-  }
+  },
+
+  loadConversations: async (userId) => {
+    set({ isLoadingConversations: true, conversationError: null });
+    try {
+      const { getConversations } = await import('../services/chatApi');
+      const conversations = await getConversations(userId);
+      
+      set((state) => {
+        const existingById = new Map(state.threads.map(t => [t.id, t]));
+        const backendIds = new Set(conversations.map(c => c.id));
+        const mergedThreads = conversations.map((conv) => {
+          const existing = existingById.get(conv.id);
+          return existing
+            ? { ...existing, title: conv.title, lastUpdated: new Date(conv.lastUpdatedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) }
+            : {
+                id: conv.id,
+                title: conv.title,
+                userId,
+                messages: [] as Message[],
+                journeyMetadata: { currentJourney: 'General Inquiry', currentStage: 'Confusion' as const, extractedThemes: [] as string[], unmetNeeds: [] as string[], riskIndicators: [] as string[] },
+                recommendations: [] as Recommendation[],
+                systemAction: null,
+                activeLens: 'None',
+                lastUpdated: new Date(conv.lastUpdatedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+              } as Thread;
+        });
+        // Drop stale local thread-xxx threads for this user that are now synced to backend
+        const localOnlyThreads = state.threads.filter(t => t.userId === userId && !backendIds.has(t.id) && t.id.startsWith('thread-'));
+        const otherUsersThreads = state.threads.filter(t => t.userId !== userId);
+        // Deduplicate by id
+        const seen = new Set<string>();
+        const allThreads = [...mergedThreads, ...localOnlyThreads, ...otherUsersThreads].filter(t => {
+          if (seen.has(t.id)) return false;
+          seen.add(t.id);
+          return true;
+        });
+        return {
+          threads: allThreads,
+          isLoadingConversations: false
+        };
+      });
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to load conversations';
+      set({ conversationError: errorMessage, isLoadingConversations: false });
+      console.error('Error loading conversations:', error);
+    }
+  },
+
+  loadConversationById: async (conversationId, userId) => {
+    set({ isLoadingConversations: true, conversationError: null });
+    try {
+      const { getConversationById } = await import('../services/chatApi');
+      const conversation = await getConversationById(conversationId, userId);
+      
+      const messages: Message[] = (conversation.messages || []).map((msg, idx) => ({
+        id: `msg-${idx}`,
+        sender: msg.role === 'assistant' ? 'ai' : 'user',
+        text: msg.content || msg.message || '',
+        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+      }));
+
+      set((state) => ({
+        threads: state.threads.map(t => {
+          if (t.id === conversationId) {
+            return {
+              ...t,
+              messages,
+              lastUpdated: new Date(conversation.lastUpdatedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+            };
+          }
+          return t;
+        }),
+        isLoadingConversations: false,
+        activeThreadId: conversationId
+      }));
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to load conversation';
+      set({ conversationError: errorMessage, isLoadingConversations: false });
+      console.error('Error loading conversation:', error);
+    }
+  },
+
+  clearConversationError: () => {
+    set({ conversationError: null });
+  },
     }),
     {
       name: 'uga-journey-store',
