@@ -3,7 +3,7 @@ import { persist } from 'zustand/middleware';
 import { getMockResponse } from '../services/mockOrchestrator';
 import type { JourneyMetadata, Recommendation } from '../services/mockOrchestrator';
 import { useAuthStore } from './authStore';
-import { sendChatMessage } from '../services/chatApi';
+import { sendChatMessage, getConversations, getConversationById } from '../services/chatApi';
 
 export interface Attachment {
   name: string;
@@ -265,6 +265,10 @@ export const useJourneyStore = create<JourneyStore>()(
 
   switchThread: (id) => {
     set({ activeThreadId: id });
+    const userId = useAuthStore.getState().user?.id || 'guest';
+    if (userId !== 'guest' && id && !id.startsWith('thread-')) {
+      get().loadConversationById(id, userId);
+    }
   },
 
   deleteThread: (id) => {
@@ -697,7 +701,6 @@ export const useJourneyStore = create<JourneyStore>()(
   loadConversations: async (userId) => {
     set({ isLoadingConversations: true, conversationError: null });
     try {
-      const { getConversations } = await import('../services/chatApi');
       const conversations = await getConversations(userId);
       
       set((state) => {
@@ -744,7 +747,6 @@ export const useJourneyStore = create<JourneyStore>()(
   loadConversationById: async (conversationId, userId) => {
     set({ isLoadingConversations: true, conversationError: null });
     try {
-      const { getConversationById } = await import('../services/chatApi');
       const conversation = await getConversationById(conversationId, userId);
       
       const messages: Message[] = (conversation.messages || []).map((msg, idx) => ({

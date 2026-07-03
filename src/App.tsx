@@ -643,7 +643,7 @@ export const App: React.FC = () => {
             <div ref={overviewRef} id="overview" className="scroll-mt-24 space-y-8">
               <FadeInSection className="space-y-6">
                 <h2 className="text-3xl xl:text-4xl font-extrabold text-[#1B4332] dark:text-emerald-400 leading-tight font-display">
-                  A Companion for the Soul,<br />Not a Chatbot.
+                  A Companion for Healing,<br />Not just a chatbot.
                 </h2>
                 <p className="text-sm xl:text-base text-gray-600 dark:text-gray-300 leading-relaxed font-medium">
                   UGA is not a simple question-and-answer interface. It functions as the connective tissue—a gentle, intelligent companion—linking sacred ancient wisdom, clinical science, and active human community to guide individuals on a personalized path of growth and recovery.
@@ -1316,9 +1316,7 @@ export const App: React.FC = () => {
                           <button 
                             onClick={(e) => {
                               e.stopPropagation();
-                              if (confirm(language === 'ta' ? 'இந்த உரையாடலை நீக்க வேண்டுமா?' : language === 'hi' ? 'क्या आप इस बातचीत को हटाना चाहते हैं?' : 'Are you sure you want to delete this conversation?')) {
-                                deleteThread(thread.id);
-                              }
+                              deleteThread(thread.id);
                             }}
                             className="p-1 text-gray-400 hover:text-red-500 dark:hover:text-red-400 rounded-lg hover:bg-red-50 dark:hover:bg-red-950/20 transition active:scale-95 flex-shrink-0"
                             title="Delete Conversation"
